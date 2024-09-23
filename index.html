@@ -6,14 +6,24 @@
     <title>Canva Content Strategy Simulator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #e0e0e0;
             margin: 0;
             padding: 20px;
             display: flex;
+            background-color: #121212;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.light-theme {
+            background-color: #ffffff;
+            color: #333333;
         }
         .main-content {
             flex: 1;
@@ -25,16 +35,28 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
             padding: 15px;
             border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             overflow-y: auto;
             max-height: 95vh;
+            transition: max-height 0.3s ease-out;
+        }
+        .floating-budget.minimized {
+            max-height: 340px;
+            overflow: hidden;
+        }
+        .light-theme .floating-budget {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
         }
         h1, h2 {
-            color: #4a4a4a;
+            color: #bb86fc;
+        }
+        .light-theme h1, .light-theme h2 {
+            color: #6200ee;
         }
         label {
             display: block;
@@ -44,10 +66,21 @@
             width: 100%;
             padding: 8px;
             margin-top: 5px;
+            background-color: #2c2c2c;
+            border: 1px solid #444;
+            color: #e0e0e0;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .light-theme input[type="text"], .light-theme input[type="number"], .light-theme select, .light-theme textarea {
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            color: #333333;
         }
         button {
-            background-color: #4CAF50;
-            color: white;
+            background-color: #03dac6;
+            color: #000;
             padding: 10px 15px;
             border: none;
             border-radius: 4px;
@@ -55,38 +88,52 @@
             margin-top: 20px;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #018786;
         }
         #strategyPreview {
             margin-top: 20px;
-            border: 1px solid #ddd;
+            border: 1px solid #444;
             padding: 10px;
             white-space: pre-wrap;
+            background-color: #1e1e1e;
+        }
+        .light-theme #strategyPreview {
+            border: 1px solid #cccccc;
+            background-color: #f0f0f0;
         }
         .strategy-section {
-            border: 1px solid #ddd;
-            padding: 15px;
+            border: 1px solid #444;
+            padding: 15px 30px;
             margin-top: 20px;
             position: relative;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+        }
+        .light-theme .strategy-section {
+            border: 1px solid #cccccc;
+            background-color: #f0f0f0;
         }
         .remove-strategy {
             position: absolute;
             top: 10px;
-            right: 10px;
-            background-color: #f44336;
-            color: white;
+            right: 40px;
+            background-color: #cf6679;
+            color: #000;
             border: none;
             padding: 5px 10px;
             cursor: pointer;
         }
         .error {
-            color: red;
+            color: #cf6679;
             font-weight: bold;
         }
         #strategyList {
             margin-top: 15px;
-            border-top: 1px solid #ddd;
+            border-top: 1px solid #444;
             padding-top: 15px;
+        }
+        .light-theme #strategyList {
+            border-top: 1px solid #cccccc;
         }
         .strategy-item {
             display: flex;
@@ -95,14 +142,96 @@
         }
         .chart-container {
             margin-top: 20px;
-            height: 300px;
             width: 100%;
+            height: 240px;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        #themeToggle {
+            position: relative;
+            top: -10px;
+            right: -200px;
+            z-index: 1000;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            padding: 5px;
+            width: 34px;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .light-theme #themeToggle {
+            color: #333333;
+        }
+        #minimizeToggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #e0e0e0;
+        }
+        .light-theme #minimizeToggle {
+            color: #333333;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23e0e0e0' d='M0 0l4 4 4-4z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+        .strategy-header {
+            display: flex;
+            align-items: center;
+        }
+        .minimize-strategy {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: 10px;
+            margin-bottom: 15px;
+        }
+        .light-theme .minimize-strategy {
+            color: #333333;
+        }
+        .strategy-content {
+            transition: max-height 0.3s ease-out;
+            max-height: 1000px;
+            overflow: hidden;
+        }
+        .strategy-content.minimized {
+            max-height: 0;
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #uploadCsv {
+            display: none;
         }
     </style>
 </head>
 <body>
+    <button id="themeToggle" class="fas fa-moon"></button>
     <div class="main-content">
-        <h1>Canva Content Strategy Simulator</h1>
+        <img src="Canva_Logo.svg.png" alt="Canva Logo" class="logo">
+        <div class="header-container">
+            <h1>Content Strategy Simulator</h1>
+            <button onclick="document.getElementById('uploadCsv').click()">Upload Previous Campaign CSV</button>
+            <input type="file" id="uploadCsv" accept=".csv" onchange="handleFileUpload(event)">
+        </div>
         <form id="strategyForm">
             <div id="strategyContainer"></div>
             <button type="button" onclick="addStrategy()">+ Add Content Strategy</button>
@@ -112,23 +241,32 @@
         <div id="strategyPreview"></div>
     </div>
     
-    <div class="floating-budget">
+    <div id="floatingBudget" class="floating-budget">
+        <button id="minimizeToggle" class="fas fa-minus"></button>
         <h2>Budget Overview</h2>
         <label for="quarterlyBudget">Total Quarterly Budget:</label>
         <input type="number" id="quarterlyBudget" name="quarterlyBudget" value="5000000" min="1000000" max="10000000" onchange="updateTotalBudget()">
         <p id="totalBudget">Remaining Budget: $5,000,000</p>
+        <p id="estimatedImpressions">Estimated Impressions: 0</p>
+        <p id="estimatedConversions">Estimated Conversions: 0</p>
+        <p id="avgConversionRate">Avg Conversion Rate: 0%</p>
         <div id="strategyList"></div>
         <div class="chart-container">
+            <h3>Audience Budget Allocation</h3>
             <canvas id="audienceChart"></canvas>
         </div>
         <div class="chart-container">
+            <h3>Channel Budget Allocation</h3>
             <canvas id="channelChart"></canvas>
         </div>
     </div>
 
     <script>
         let strategyCount = 0;
-        let audienceChart, channelChart;
+        const charts = {
+            audienceChart: null,
+            channelChart: null
+        };
 
         function addStrategy() {
             strategyCount++;
@@ -136,61 +274,65 @@
             const section = document.createElement('div');
             section.className = 'strategy-section';
             section.innerHTML = `
-                <h2>Content Strategy #${strategyCount}</h2>
-                <button type="button" class="remove-strategy" onclick="removeStrategy(this)">Remove</button>
-                <label for="campaignName${strategyCount}">Campaign Name:</label>
-                <input type="text" id="campaignName${strategyCount}" name="campaignName${strategyCount}" required oninput="updateStrategyList()">
-                
-                <label for="budget${strategyCount}">Budget:</label>
-                <input type="number" id="budget${strategyCount}" name="budget${strategyCount}" min="0" value="0" oninput="updateBudgetValue(this)">
-                
-                <label for="channel${strategyCount}">Channel:</label>
-                <select id="channel${strategyCount}" name="channel${strategyCount}" required onchange="updateCharts()">
-                    <option value="podcast">Podcast Sponsorships</option>
-                    <option value="social">Social Media</option>
-                    <option value="blog">Blog</option>
-                    <option value="email">Email Marketing</option>
-                    <option value="seo">SEO</option>
-                    <option value="ppc">PPC Advertising</option>
-                </select>
-                
-                <label for="audience${strategyCount}">Audience Targeting:</label>
-                <select id="audience${strategyCount}" name="audience${strategyCount}" required onchange="updateCharts()">
-                    <option value="small_business">Small Business Owners</option>
-                    <option value="designers">Professional Designers</option>
-                    <option value="marketers">Digital Marketers</option>
-                    <option value="students">Students</option>
-                    <option value="educators">Educators</option>
-                    <option value="nonprofits">Non-Profit Organizations</option>
-                    <option value="enterprise">Enterprise Companies</option>
-                </select>
-                
-                <label for="kpi${strategyCount}">Key Performance Indicator:</label>
-                <select id="kpi${strategyCount}" name="kpi${strategyCount}" required>
-                    <option value="user_acquisition">New User Acquisition</option>
-                    <option value="conversion_rate">Conversion Rate</option>
-                    <option value="engagement">User Engagement</option>
-                    <option value="retention">User Retention</option>
-                    <option value="revenue">Revenue Growth</option>
-                    <option value="brand_awareness">Brand Awareness</option>
-                    <option value="feature_adoption">Feature Adoption</option>
-                </select>
-                
-                <label for="strategy${strategyCount}">Additional Strategy Information:</label>
-                <textarea id="strategy${strategyCount}" name="strategy${strategyCount}" rows="4"></textarea>
+                <div class="strategy-header">
+                    <h2>Content Strategy #${strategyCount}</h2>
+                    <button type="button" class="minimize-strategy fas fa-minus" onclick="toggleStrategy(this)"></button>
+                </div>
+                <div class="strategy-content">
+                    <button type="button" class="remove-strategy" onclick="removeStrategy(this)">Remove</button>
+                    <label for="campaignName${strategyCount}">Campaign Name:</label>
+                    <input type="text" id="campaignName${strategyCount}" name="campaignName${strategyCount}" required oninput="updateStrategyList()">
+                    
+                    <label for="budget${strategyCount}">Budget:</label>
+                    <input type="number" id="budget${strategyCount}" name="budget${strategyCount}" min="0" value="0" oninput="updateBudgetValue(this)">
+                    
+                    <label for="channel${strategyCount}">Channel (estimated conversion rate):</label>
+                    <select id="channel${strategyCount}" name="channel${strategyCount}" required onchange="updateCharts(); updateEstimates();">
+                        <option value="podcast">Podcast Sponsorships (2.2%)</option>
+                        <option value="social">Social Media (1.8%)</option>
+                        <option value="blog">Blog (2.0%)</option>
+                        <option value="email">Email Marketing (2.6%)</option>
+                        <option value="seo">SEO (2.4%)</option>
+                        <option value="ppc">PPC Advertising (2.6%)</option>
+                    </select>
+                    
+                    <label for="audience${strategyCount}">Audience Targeting (estimated conversion rate):</label>
+                    <select id="audience${strategyCount}" name="audience${strategyCount}" required onchange="updateCharts(); updateEstimates();">
+                        <option value="small_business">Small Business Owners (2.4%)</option>
+                        <option value="designers">Professional Designers (2.2%)</option>
+                        <option value="marketers">Digital Marketers (2.6%)</option>
+                        <option value="students">Students (1.6%)</option>
+                        <option value="educators">Educators (2.0%)</option>
+                        <option value="nonprofits">Non-Profit Organizations (2.2%)</option>
+                        <option value="enterprise">Enterprise Companies (2.8%)</option>
+                    </select>
+                    
+                    <label for="strategy${strategyCount}">Additional Information:</label>
+                    <textarea id="strategy${strategyCount}" name="strategy${strategyCount}" rows="4"></textarea>
+                </div>
             `;
             container.appendChild(section);
             updateTotalBudget();
+            updateCharts();
+        }
+
+        function toggleStrategy(button) {
+            const content = button.closest('.strategy-section').querySelector('.strategy-content');
+            content.classList.toggle('minimized');
+            button.classList.toggle('fa-minus');
+            button.classList.toggle('fa-plus');
         }
 
         function removeStrategy(button) {
-            const section = button.parentElement;
+            const section = button.closest('.strategy-section');
             section.parentElement.removeChild(section);
             updateTotalBudget();
+            updateCharts();
         }
 
         function updateBudgetValue(input) {
             updateTotalBudget();
+            updateCharts();
         }
 
         function updateStrategyList() {
@@ -236,6 +378,93 @@
             totalBudgetDisplayElement.className = remainingBudget < 0 ? 'error' : '';
 
             updateStrategyList();
+            updateEstimates();
+        }
+
+        function updateEstimates() {
+            let totalImpressions = 0;
+            let totalConversions = 0;
+            let totalBudget = 0;
+            let totalConversionRate = 0;
+            const strategies = document.querySelectorAll('.strategy-section');
+            
+            strategies.forEach(strategy => {
+                const budget = parseInt(strategy.querySelector('input[name^="budget"]').value) || 0;
+                const channel = strategy.querySelector('select[name^="channel"]').value;
+                const audience = strategy.querySelector('select[name^="audience"]').value;
+                
+                // These are placeholder calculations. Adjust as needed for more accurate estimates.
+                let impressionRate = 10; // Base rate: 10 impressions per dollar
+                let channelConversionRate = 0.02; // Base rate: 2% conversion rate
+                let audienceConversionRate = 0.02; // Base rate: 2% conversion rate
+                
+                // Adjust rates based on channel
+                switch(channel) {
+                    case 'podcast':
+                        impressionRate *= 1.2;
+                        channelConversionRate = 0.022;
+                        break;
+                    case 'social':
+                        impressionRate *= 1.5;
+                        channelConversionRate = 0.018;
+                        break;
+                    case 'blog':
+                        channelConversionRate = 0.020;
+                        break;
+                    case 'email':
+                        channelConversionRate = 0.026;
+                        break;
+                    case 'seo':
+                        channelConversionRate = 0.024;
+                        break;
+                    case 'ppc':
+                        impressionRate *= 0.8;
+                        channelConversionRate = 0.026;
+                        break;
+                }
+                
+                // Adjust rates based on audience
+                switch(audience) {
+                    case 'small_business':
+                        impressionRate *= 0.9;
+                        audienceConversionRate = 0.024;
+                        break;
+                    case 'designers':
+                        impressionRate *= 1.1;
+                        audienceConversionRate = 0.022;
+                        break;
+                    case 'marketers':
+                        audienceConversionRate = 0.026;
+                        break;
+                    case 'students':
+                        impressionRate *= 1.3;
+                        audienceConversionRate = 0.016;
+                        break;
+                    case 'educators':
+                        audienceConversionRate = 0.020;
+                        break;
+                    case 'nonprofits':
+                        audienceConversionRate = 0.022;
+                        break;
+                    case 'enterprise':
+                        audienceConversionRate = 0.028;
+                        break;
+                }
+                
+                const strategyConversionRate = (channelConversionRate + audienceConversionRate) / 2;
+                const strategyImpressions = Math.floor(budget * impressionRate);
+                const strategyConversions = Math.floor(strategyImpressions * strategyConversionRate);
+                
+                totalImpressions += strategyImpressions;
+                totalConversions += strategyConversions;
+                totalBudget += budget;
+                totalConversionRate += strategyConversionRate;
+            });
+
+            document.getElementById('estimatedImpressions').textContent = `Estimated Impressions: ${totalImpressions.toLocaleString()}`;
+            document.getElementById('estimatedConversions').textContent = `Estimated Conversions: ${totalConversions.toLocaleString()}`;
+            const avgConversionRate = strategies.length > 0 ? (totalConversionRate / strategies.length) * 100 : 0;
+            document.getElementById('avgConversionRate').textContent = `Avg Conversion Rate: ${avgConversionRate.toFixed(2)}%`;
         }
 
         function updateCharts() {
@@ -252,47 +481,62 @@
                 channelData[channel] = (channelData[channel] || 0) + budget;
             });
 
-            console.log('Audience Data:', audienceData);
-            console.log('Channel Data:', channelData);
-
-            createOrUpdateChart('audienceChart', 'Audience Budget Allocation', audienceData);
-            createOrUpdateChart('channelChart', 'Channel Budget Allocation', channelData);
+            createPieChart('audienceChart', audienceData);
+            createPieChart('channelChart', channelData);
         }
 
-        function createOrUpdateChart(canvasId, title, data) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            const chartData = {
-                labels: Object.keys(data),
-                datasets: [{
-                    data: Object.values(data),
-                    backgroundColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'
-                    ]
-                }]
-            };
+        function createPieChart(containerId, data) {
+            const ctx = document.getElementById(containerId).getContext('2d');
+            
+            if (charts[containerId]) {
+                charts[containerId].destroy();
+            }
 
-            if (window[canvasId]) {
-                window[canvasId].data = chartData;
-                window[canvasId].update();
-            } else {
-                window[canvasId] = new Chart(ctx, {
-                    type: 'pie',
-                    data: chartData,
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: title
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+
+            charts[containerId] = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    tooltips: {
+                        callbacks: {
+                            label: function(tooltipItem, data) {
+                                const dataset = data.datasets[tooltipItem.datasetIndex];
+                                const total = dataset.data.reduce((acc, current) => acc + current, 0);
+                                const currentValue = dataset.data[tooltipItem.index];
+                                const percentage = ((currentValue / total) * 100).toFixed(2);
+                                return `${data.labels[tooltipItem.index]}: $${currentValue.toLocaleString()} (${percentage}%)`;
+                            }
+                        }
+                    },
+                    plugins: {
+                        datalabels: {
+                            formatter: (value, ctx) => {
+                                const dataset = ctx.chart.data.datasets[0];
+                                const total = dataset.data.reduce((acc, data) => acc + data, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `$${value.toLocaleString()}\n(${percentage}%)`;
                             },
-                            legend: {
-                                position: 'bottom'
+                            color: '#fff',
+                            font: {
+                                weight: 'bold',
+                                size: 11
                             }
                         }
                     }
-                });
-            }
+                }
+            });
         }
 
         function previewStrategy() {
@@ -320,7 +564,7 @@
 
         function downloadCSV() {
             const totalBudget = document.getElementById('quarterlyBudget').value;
-            const strategies = document.querySelectorAll('.strategy-section');
+            const strategies = Array.from(document.querySelectorAll('.strategy-section'));
             const data = strategies.map((strategy, index) => {
                 const strategyData = {
                     'Strategy Number': index + 1,
@@ -364,6 +608,70 @@
                 alert("An error occurred while generating the CSV file. Please try again.");
             }
         }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const contents = e.target.result;
+                    Papa.parse(contents, {
+                        header: true,
+                        complete: function(results) {
+                            populateStrategiesFromCSV(results.data);
+                        }
+                    });
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        function populateStrategiesFromCSV(data) {
+            // Clear existing strategies
+            document.getElementById('strategyContainer').innerHTML = '';
+            strategyCount = 0;
+
+            // Set the total quarterly budget
+            const totalBudget = data[0]['Total Quarterly Budget'].replace(/[^0-9]/g, '');
+            document.getElementById('quarterlyBudget').value = totalBudget;
+
+            // Add strategies from CSV
+            data.forEach((row, index) => {
+                addStrategy();
+                const strategySection = document.querySelectorAll('.strategy-section')[index];
+                
+                Object.keys(row).forEach(key => {
+                    if (key !== 'Strategy Number' && key !== 'Total Quarterly Budget') {
+                        const input = strategySection.querySelector(`[name="${key}"]`);
+                        if (input) {
+                            if (key.startsWith('budget')) {
+                                input.value = row[key].replace(/[^0-9]/g, '');
+                            } else {
+                                input.value = row[key];
+                            }
+                        }
+                    }
+                });
+            });
+
+            updateTotalBudget();
+            updateCharts();
+        }
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            themeToggle.className = document.body.classList.contains('light-theme') ? 'fas fa-sun' : 'fas fa-moon';
+        });
+
+        // Minimize toggle functionality
+        const minimizeToggle = document.getElementById('minimizeToggle');
+        const floatingBudget = document.getElementById('floatingBudget');
+        minimizeToggle.addEventListener('click', () => {
+            floatingBudget.classList.toggle('minimized');
+            minimizeToggle.className = floatingBudget.classList.contains('minimized') ? 'fas fa-plus' : 'fas fa-minus';
+        });
 
         // Initialize with one strategy and charts
         window.onload = function() {
