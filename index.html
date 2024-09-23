@@ -404,24 +404,27 @@
                 // Adjust rates based on channel
                 switch(channel) {
                     case 'podcast':
-                        impressionRate *= 1.2;
+                        impressionRate *= 0.8;
                         channelConversionRate = 0.022;
                         break;
                     case 'social':
-                        impressionRate *= 1.5;
+                        impressionRate *= 1.2;
                         channelConversionRate = 0.018;
                         break;
                     case 'blog':
+                        impressionRate *= 0.5;
                         channelConversionRate = 0.020;
                         break;
                     case 'email':
+                        impressionRate *= 0.3;
                         channelConversionRate = 0.026;
                         break;
                     case 'seo':
+                        impressionRate *= 1.0;
                         channelConversionRate = 0.024;
                         break;
                     case 'ppc':
-                        impressionRate *= 0.8;
+                        impressionRate *= 1.5;
                         channelConversionRate = 0.026;
                         break;
                 }
@@ -429,27 +432,31 @@
                 // Adjust rates based on audience
                 switch(audience) {
                     case 'small_business':
-                        impressionRate *= 0.9;
+                        impressionRate *= 1.0;
                         audienceConversionRate = 0.024;
                         break;
                     case 'designers':
-                        impressionRate *= 1.1;
+                        impressionRate *= 0.8;
                         audienceConversionRate = 0.022;
                         break;
                     case 'marketers':
+                        impressionRate *= 1.2;
                         audienceConversionRate = 0.026;
                         break;
                     case 'students':
-                        impressionRate *= 1.3;
+                        impressionRate *= 1.5;
                         audienceConversionRate = 0.016;
                         break;
                     case 'educators':
+                        impressionRate *= 0.7;
                         audienceConversionRate = 0.020;
                         break;
                     case 'nonprofits':
+                        impressionRate *= 0.6;
                         audienceConversionRate = 0.022;
                         break;
                     case 'enterprise':
+                        impressionRate *= 0.9;
                         audienceConversionRate = 0.028;
                         break;
                 }
