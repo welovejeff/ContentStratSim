@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canva Content Strategy Simulator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,7 +21,7 @@
             padding-right: 20px;
         }
         .floating-budget {
-            width: 300px;
+            width: 400px;
             position: fixed;
             top: 20px;
             right: 20px;
@@ -29,6 +30,8 @@
             padding: 15px;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            max-height: 95vh;
         }
         h1, h2 {
             color: #4a4a4a;
@@ -80,18 +83,6 @@
             color: red;
             font-weight: bold;
         }
-        .slider-container {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-        .slider-container input {
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        .budget-value {
-            min-width: 100px;
-        }
         #strategyList {
             margin-top: 15px;
             border-top: 1px solid #ddd;
@@ -101,6 +92,11 @@
             display: flex;
             justify-content: space-between;
             margin-bottom: 5px;
+        }
+        .chart-container {
+            margin-top: 20px;
+            height: 300px;
+            width: 100%;
         }
     </style>
 </head>
@@ -122,10 +118,17 @@
         <input type="number" id="quarterlyBudget" name="quarterlyBudget" value="5000000" min="1000000" max="10000000" onchange="updateTotalBudget()">
         <p id="totalBudget">Remaining Budget: $5,000,000</p>
         <div id="strategyList"></div>
+        <div class="chart-container">
+            <canvas id="audienceChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <canvas id="channelChart"></canvas>
+        </div>
     </div>
 
     <script>
         let strategyCount = 0;
+        let audienceChart, channelChart;
 
         function addStrategy() {
             strategyCount++;
@@ -139,13 +142,10 @@
                 <input type="text" id="campaignName${strategyCount}" name="campaignName${strategyCount}" required oninput="updateStrategyList()">
                 
                 <label for="budget${strategyCount}">Budget:</label>
-                <div class="slider-container">
-                    <input type="range" id="budget${strategyCount}" name="budget${strategyCount}" min="0" max="5000000" step="10000" value="0" oninput="updateBudgetValue(this)">
-                    <span class="budget-value" id="budgetValue${strategyCount}">$0</span>
-                </div>
+                <input type="number" id="budget${strategyCount}" name="budget${strategyCount}" min="0" value="0" oninput="updateBudgetValue(this)">
                 
                 <label for="channel${strategyCount}">Channel:</label>
-                <select id="channel${strategyCount}" name="channel${strategyCount}" required>
+                <select id="channel${strategyCount}" name="channel${strategyCount}" required onchange="updateCharts()">
                     <option value="podcast">Podcast Sponsorships</option>
                     <option value="social">Social Media</option>
                     <option value="blog">Blog</option>
@@ -155,7 +155,7 @@
                 </select>
                 
                 <label for="audience${strategyCount}">Audience Targeting:</label>
-                <select id="audience${strategyCount}" name="audience${strategyCount}" required>
+                <select id="audience${strategyCount}" name="audience${strategyCount}" required onchange="updateCharts()">
                     <option value="small_business">Small Business Owners</option>
                     <option value="designers">Professional Designers</option>
                     <option value="marketers">Digital Marketers</option>
@@ -189,12 +189,7 @@
             updateTotalBudget();
         }
 
-        function updateBudgetValue(slider) {
-            const value = parseInt(slider.value);
-            const valueDisplay = document.getElementById(slider.id + 'Value');
-            if (valueDisplay) {
-                valueDisplay.textContent = '$' + value.toLocaleString();
-            }
+        function updateBudgetValue(input) {
             updateTotalBudget();
         }
 
@@ -205,10 +200,10 @@
             const strategies = document.querySelectorAll('.strategy-section');
             strategies.forEach((strategy, index) => {
                 const campaignNameInput = strategy.querySelector('input[name^="campaignName"]');
-                const budgetSlider = strategy.querySelector('input[type="range"][name^="budget"]');
+                const budgetInput = strategy.querySelector('input[name^="budget"]');
                 
                 const campaignName = campaignNameInput.value || `Strategy #${index + 1}`;
-                const budgetValue = parseInt(budgetSlider.value);
+                const budgetValue = parseInt(budgetInput.value) || 0;
 
                 const strategyItem = document.createElement('div');
                 strategyItem.className = 'strategy-item';
@@ -218,6 +213,8 @@
                 `;
                 strategyList.appendChild(strategyItem);
             });
+
+            updateCharts();
         }
 
         function updateTotalBudget() {
@@ -228,29 +225,74 @@
 
             const totalBudget = parseInt(totalBudgetElement.value);
             let allocatedBudget = 0;
-            const budgetSliders = document.querySelectorAll('input[type="range"][name^="budget"]');
+            const budgetInputs = document.querySelectorAll('input[name^="budget"]');
             
-            budgetSliders.forEach(slider => {
-                const value = parseInt(slider.value);
-                allocatedBudget += value;
-                const valueDisplay = document.getElementById(slider.id + 'Value');
-                if (valueDisplay) {
-                    valueDisplay.textContent = '$' + value.toLocaleString();
-                }
+            budgetInputs.forEach(input => {
+                allocatedBudget += parseInt(input.value) || 0;
             });
 
             const remainingBudget = totalBudget - allocatedBudget;
             totalBudgetDisplayElement.textContent = `Remaining Budget: $${remainingBudget.toLocaleString()}`;
             totalBudgetDisplayElement.className = remainingBudget < 0 ? 'error' : '';
 
-            // Update max values for all sliders
-            budgetSliders.forEach(slider => {
-                const currentValue = parseInt(slider.value);
-                const newMax = Math.min(totalBudget, currentValue + remainingBudget);
-                slider.max = newMax;
+            updateStrategyList();
+        }
+
+        function updateCharts() {
+            const strategies = document.querySelectorAll('.strategy-section');
+            const audienceData = {};
+            const channelData = {};
+
+            strategies.forEach(strategy => {
+                const budget = parseInt(strategy.querySelector('input[name^="budget"]').value) || 0;
+                const audience = strategy.querySelector('select[name^="audience"]').value;
+                const channel = strategy.querySelector('select[name^="channel"]').value;
+
+                audienceData[audience] = (audienceData[audience] || 0) + budget;
+                channelData[channel] = (channelData[channel] || 0) + budget;
             });
 
-            updateStrategyList();
+            console.log('Audience Data:', audienceData);
+            console.log('Channel Data:', channelData);
+
+            createOrUpdateChart('audienceChart', 'Audience Budget Allocation', audienceData);
+            createOrUpdateChart('channelChart', 'Channel Budget Allocation', channelData);
+        }
+
+        function createOrUpdateChart(canvasId, title, data) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            const chartData = {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'
+                    ]
+                }]
+            };
+
+            if (window[canvasId]) {
+                window[canvasId].data = chartData;
+                window[canvasId].update();
+            } else {
+                window[canvasId] = new Chart(ctx, {
+                    type: 'pie',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: title
+                            },
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         function previewStrategy() {
@@ -296,22 +338,38 @@
                 });
                 return strategyData;
             });
-            const csv = Papa.unparse(data);
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'canva_content_strategies.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+
+            if (data.length === 0) {
+                alert("No strategies to download. Please add at least one strategy.");
+                return;
+            }
+
+            try {
+                const csv = Papa.unparse(data);
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'canva_content_strategies.csv');
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert("Your browser doesn't support downloading CSV files. Please try a different browser.");
+                }
+            } catch (error) {
+                console.error("Error generating CSV:", error);
+                alert("An error occurred while generating the CSV file. Please try again.");
             }
         }
 
-        // Initialize with one strategy
-        addStrategy();
+        // Initialize with one strategy and charts
+        window.onload = function() {
+            addStrategy();
+            updateCharts();
+        };
     </script>
 </body>
 </html>
