@@ -145,6 +145,9 @@
             width: 100%;
             height: 240px;
         }
+        .chart-container + .chart-container {
+            margin-top: 70px;
+        }
         .logo {
             max-width: 150px;
             margin-bottom: 20px;
@@ -252,12 +255,12 @@
         <p id="avgConversionRate">Avg Conversion Rate: 0%</p>
         <div id="strategyList"></div>
         <div class="chart-container">
-            <h3>Audience Budget Allocation</h3>
-            <canvas id="audienceChart"></canvas>
-        </div>
-        <div class="chart-container">
             <h3>Channel Budget Allocation</h3>
             <canvas id="channelChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Audience Budget Allocation</h3>
+            <canvas id="audienceChart"></canvas>
         </div>
     </div>
 
@@ -664,9 +667,12 @@
                 
                 Object.keys(row).forEach(key => {
                     if (key !== 'Strategy Number' && key !== 'Total Quarterly Budget') {
-                        const input = strategySection.querySelector(`[name="${key}"]`);
+                        let inputName = key.replace(/\s+/g, '').toLowerCase();
+                        if (inputName === 'campaignname') inputName = 'campaignName';
+                        if (inputName === 'additionalinformation') inputName = 'strategy';
+                        const input = strategySection.querySelector(`[name="${inputName}${index + 1}"]`);
                         if (input) {
-                            if (key.startsWith('budget')) {
+                            if (key.startsWith('Budget')) {
                                 input.value = row[key].replace(/[^0-9]/g, '');
                             } else {
                                 input.value = row[key];
