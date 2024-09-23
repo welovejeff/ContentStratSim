@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canva Content Strategy Simulator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #4a4a4a;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #strategyPreview {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+        .strategy-section {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 20px;
+            position: relative;
+        }
+        .remove-strategy {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .sticky-budget {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            z-index: 100;
+        }
+        #totalBudget {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .slider-container input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .budget-value {
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Canva Content Strategy Simulator</h1>
+    <div class="sticky-budget">
+        <label for="quarterlyBudget">Total Quarterly Budget:</label>
+        <input type="number" id="quarterlyBudget" name="quarterlyBudget" value="5000000" min="1000000" max="10000000" onchange="updateTotalBudget()">
+        <p id="totalBudget">Remaining Budget: $5,000,000</p>
+    </div>
+    <form id="strategyForm">
+        <div id="strategyContainer"></div>
+        <button type="button" onclick="addStrategy()">+ Add Content Strategy</button>
+        <button type="button" onclick="previewStrategy()">Preview Strategy</button>
+        <button type="button" onclick="downloadCSV()">Download CSV</button>
+    </form>
+
+    <div id="strategyPreview"></div>
+
+    <script>
+        let strategyCount = 0;
+
+        function addStrategy() {
+            strategyCount++;
+            const container = document.getElementById('strategyContainer');
+            const section = document.createElement('div');
+            section.className = 'strategy-section';
+            section.innerHTML = `
+                <h2>Content Strategy #${strategyCount}</h2>
+                <button type="button" class="remove-strategy" onclick="removeStrategy(this)">Remove</button>
+                <label for="campaignName${strategyCount}">Campaign Name:</label>
+                <input type="text" id="campaignName${strategyCount}" name="campaignName${strategyCount}" required>
+                
+                <label for="budget${strategyCount}">Budget:</label>
+                <div class="slider-container">
+                    <input type="range" id="budget${strategyCount}" name="budget${strategyCount}" min="0" max="5000000" step="10000" value="0" oninput="updateBudgetValue(this)">
+                    <span class="budget-value" id="budgetValue${strategyCount}">$0</span>
+                </div>
+                
+                <label for="channel${strategyCount}">Channel:</label>
+                <select id="channel${strategyCount}" name="channel${strategyCount}" required>
+                    <option value="podcast">Podcast Sponsorships</option>
+                    <option value="social">Social Media</option>
+                    <option value="blog">Blog</option>
+                    <option value="email">Email Marketing</option>
+                    <option value="seo">SEO</option>
+                    <option value="ppc">PPC Advertising</option>
+                </select>
+                
+                <label for="audience${strategyCount}">Audience Targeting:</label>
+                <select id="audience${strategyCount}" name="audience${strategyCount}" required>
+                    <option value="small_business">Small Business Owners</option>
+                    <option value="designers">Professional Designers</option>
+                    <option value="marketers">Digital Marketers</option>
+                    <option value="students">Students</option>
+                    <option value="educators">Educators</option>
+                    <option value="nonprofits">Non-Profit Organizations</option>
+                    <option value="enterprise">Enterprise Companies</option>
+                </select>
+                
+                <label for="kpi${strategyCount}">Key Performance Indicator:</label>
+                <select id="kpi${strategyCount}" name="kpi${strategyCount}" required>
+                    <option value="user_acquisition">New User Acquisition</option>
+                    <option value="conversion_rate">Conversion Rate</option>
+                    <option value="engagement">User Engagement</option>
+                    <option value="retention">User Retention</option>
+                    <option value="revenue">Revenue Growth</option>
+                    <option value="brand_awareness">Brand Awareness</option>
+                    <option value="feature_adoption">Feature Adoption</option>
+                </select>
+                
+                <label for="strategy${strategyCount}">Additional Strategy Information:</label>
+                <textarea id="strategy${strategyCount}" name="strategy${strategyCount}" rows="4"></textarea>
+            `;
+            container.appendChild(section);
+            updateTotalBudget();
+        }
+
+        function removeStrategy(button) {
+            const section = button.parentElement;
+            section.parentElement.removeChild(section);
+            updateTotalBudget();
+        }
+
+        function updateBudgetValue(slider) {
+            const value = parseInt(slider.value);
+            const valueDisplay = document.getElementById(slider.id + 'Value');
+            if (valueDisplay) {
+                valueDisplay.textContent = '$' + value.toLocaleString();
+            }
+            updateTotalBudget();
+        }
+
+        function updateTotalBudget() {
+            const totalBudgetElement = document.getElementById('quarterlyBudget');
+            const totalBudgetDisplayElement = document.getElementById('totalBudget');
+            
+            if (!totalBudgetElement || !totalBudgetDisplayElement) return;
+
+            const totalBudget = parseInt(totalBudgetElement.value);
+            let allocatedBudget = 0;
+            const budgetSliders = document.querySelectorAll('input[type="range"][name^="budget"]');
+            
+            budgetSliders.forEach(slider => {
+                allocatedBudget += parseInt(slider.value);
+                const valueDisplay = document.getElementById(slider.id + 'Value');
+                if (valueDisplay) {
+                    valueDisplay.textContent = '$' + parseInt(slider.value).toLocaleString();
+                }
+            });
+
+            const remainingBudget = totalBudget - allocatedBudget;
+            totalBudgetDisplayElement.textContent = `Remaining Budget: $${remainingBudget.toLocaleString()}`;
+            totalBudgetDisplayElement.className = remainingBudget < 0 ? 'error' : '';
+
+            // Update max values for all sliders
+            budgetSliders.forEach(slider => {
+                const currentValue = parseInt(slider.value);
+                const newMax = Math.min(totalBudget, currentValue + remainingBudget);
+                slider.max = newMax;
+            });
+        }
+
+        function previewStrategy() {
+            const form = document.getElementById('strategyForm');
+            const preview = document.getElementById('strategyPreview');
+            preview.textContent = '';
+            const totalBudget = document.getElementById('quarterlyBudget').value;
+            preview.textContent += `Total Quarterly Budget: $${parseInt(totalBudget).toLocaleString()}\n\n`;
+            const strategies = document.querySelectorAll('.strategy-section');
+            strategies.forEach((strategy, index) => {
+                preview.textContent += `Content Strategy #${index + 1}\n`;
+                const inputs = strategy.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.name) {
+                        let value = input.value;
+                        if (input.name.startsWith('budget')) {
+                            value = '$' + parseInt(value).toLocaleString();
+                        }
+                        preview.textContent += `${input.name}: ${value}\n`;
+                    }
+                });
+                preview.textContent += '\n';
+            });
+        }
+
+        function downloadCSV() {
+            const totalBudget = document.getElementById('quarterlyBudget').value;
+            const strategies = document.querySelectorAll('.strategy-section');
+            const data = strategies.map((strategy, index) => {
+                const strategyData = {
+                    'Strategy Number': index + 1,
+                    'Total Quarterly Budget': '$' + parseInt(totalBudget).toLocaleString()
+                };
+                const inputs = strategy.querySelectorAll('input, select, textarea');
+                inputs.forEach(input => {
+                    if (input.name) {
+                        let value = input.value;
+                        if (input.name.startsWith('budget')) {
+                            value = '$' + parseInt(value).toLocaleString();
+                        }
+                        strategyData[input.name] = value;
+                    }
+                });
+                return strategyData;
+            });
+            const csv = Papa.unparse(data);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'canva_content_strategies.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        // Initialize with one strategy
+        addStrategy();
+    </script>
+</body>
+</html>
