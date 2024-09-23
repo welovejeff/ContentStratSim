@@ -564,24 +564,45 @@
 
         function downloadCSV() {
             const totalBudget = document.getElementById('quarterlyBudget').value;
-            const strategies = Array.from(document.querySelectorAll('.strategy-section'));
-            const data = strategies.map((strategy, index) => {
+            const strategies = document.querySelectorAll('.strategy-section');
+            console.log('Number of strategies found:', strategies.length);
+            const data = [];
+
+            strategies.forEach((strategy, index) => {
+                console.log('Processing strategy #', index + 1);
                 const strategyData = {
                     'Strategy Number': index + 1,
-                    'Total Quarterly Budget': '$' + parseInt(totalBudget).toLocaleString()
+                    'Total Quarterly Budget': '$' + parseInt(totalBudget).toLocaleString(),
+                    'Campaign Name': '',
+                    'Budget': '',
+                    'Channel': '',
+                    'Audience': '',
+                    'Additional Information': ''
                 };
                 const inputs = strategy.querySelectorAll('input, select, textarea');
+                console.log('Number of inputs found:', inputs.length);
                 inputs.forEach(input => {
                     if (input.name) {
                         let value = input.value;
                         if (input.name.startsWith('budget')) {
                             value = '$' + parseInt(value).toLocaleString();
+                            strategyData['Budget'] = value;
+                        } else if (input.name.startsWith('campaignName')) {
+                            strategyData['Campaign Name'] = value;
+                        } else if (input.name.startsWith('channel')) {
+                            strategyData['Channel'] = value;
+                        } else if (input.name.startsWith('audience')) {
+                            strategyData['Audience'] = value;
+                        } else if (input.name.startsWith('strategy')) {
+                            strategyData['Additional Information'] = value;
                         }
-                        strategyData[input.name] = value;
+                        console.log('Input:', input.name, 'Value:', value);
                     }
                 });
-                return strategyData;
+                data.push(strategyData);
             });
+
+            console.log('Final data array:', data);
 
             if (data.length === 0) {
                 alert("No strategies to download. Please add at least one strategy.");
@@ -590,6 +611,7 @@
 
             try {
                 const csv = Papa.unparse(data);
+                console.log('Generated CSV:', csv);
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 if (link.download !== undefined) {
