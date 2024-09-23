@@ -23,7 +23,7 @@ Users can create multiple content strategies, allocating budgets to various chan
 
 ## Channel and Audience Weights
 
-Below are the weights used to calculate the estimated performance metrics for each channel and audience:
+The CPM is set in the Sim at $100. Below are the weights used to calculate the estimated performance metrics for each channel and audience:
 
 | Channel               | Impressions Weight | Estimated Conversion Rate |
 |-----------------------|---------------------|---------------------------|
