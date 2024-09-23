@@ -1,9 +1,5 @@
 # Content Strategy Simulator
 
-![Canva Logo](Canva_Logo.svg.png)
-
-## Welcome to the Content Strategy Simulator!
-
 This interactive tool is designed to help students and professionals alike dive into the world of content strategy, budget allocation, and performance metrics. By simulating real-world decision-making scenarios for Canva's marketing efforts, users can gain hands-on experience in strategic planning and analysis.
 
 ## Project Purpose
@@ -65,3 +61,11 @@ To get started with the Content Strategy Simulator:
 3. Start creating and analyzing your content strategies!
 
 We hope you find this simulator both educational and enjoyable. Happy strategizing!
+
+## About the Author
+
+Jeff MacDonald, Director of AI at Mekanism, brings a thoughtful and inventive approach to his role there to do as many firsts for clients as possible. He collaborates closely with strategists and creatives, focusing on introducing fresh and innovative social media strategies for clients such as Adobe, AT&T, Cricket Wireless, Q-tips, and Lenovo. Jeff’s approach is grounded in a blend of creative prototyping and social listening, which informs his development of engaging experiences that resonate with communities and audiences.
+
+Beyond the realm of client-based work, Jeff has a passion for interactive art installations. His creations, often involving LED lights and interactive elements, are designed to connect people in shared, immersive experiences. Jeff also is deeply engaged in artificial intelligence and finding practical applications for businesses. Jeff currently sits on the AI Community of Practice at Plus Company, Mekanism’s holding company, where he’s helping lead the charge on how AI will impact their agencies.
+
+At his core, Jeff is dedicated to exploring and utilizing the potential of content and technology to foster connections and bring people together. His work at Mekanism reflects his commitment to this goal, showcasing his ability to merge creativity with practical strategies in the digital space.
