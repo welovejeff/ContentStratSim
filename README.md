@@ -21,26 +21,28 @@ Users can create multiple content strategies, allocating budgets to various chan
 
 ## Channel and Audience Weights
 
+## Channel and Audience Weights
+
 Below are the weights used to calculate the estimated performance metrics for each channel and audience:
 
-| Channel               | Impressions Weight | Conversion Weight | Avg Conversion Rate |
-|-----------------------|---------------------|-------------------|---------------------|
-| Podcast Sponsorships  | 0.8                 | 0.6               | 2.5%                |
-| Social Media          | 1.2                 | 0.9               | 3.0%                |
-| Blog                  | 0.5                 | 0.7               | 4.0%                |
-| Email Marketing       | 0.3                 | 1.1               | 5.5%                |
-| SEO                   | 1.0                 | 0.8               | 3.5%                |
-| PPC Advertising       | 1.5                 | 1.2               | 4.5%                |
+| Channel               | Impressions Weight | Estimated Conversion Rate |
+|-----------------------|---------------------|---------------------------|
+| Podcast Sponsorships  | 0.8                 | 2.2%                      |
+| Social Media          | 1.2                 | 1.8%                      |
+| Blog                  | 0.5                 | 2.0%                      |
+| Email Marketing       | 0.3                 | 2.6%                      |
+| SEO                   | 1.0                 | 2.4%                      |
+| PPC Advertising       | 1.5                 | 2.6%                      |
 
-| Audience              | Impressions Weight | Conversion Weight | Avg Conversion Rate |
-|-----------------------|---------------------|-------------------|---------------------|
-| Small Business Owners | 1.0                 | 1.2               | 4.0%                |
-| Professional Designers| 0.8                 | 1.5               | 5.5%                |
-| Digital Marketers     | 1.2                 | 1.0               | 3.5%                |
-| Students              | 1.5                 | 0.7               | 2.5%                |
-| Educators             | 0.7                 | 0.9               | 3.0%                |
-| Non-Profit Orgs       | 0.6                 | 0.8               | 2.8%                |
-| Enterprise Companies  | 0.9                 | 1.3               | 4.5%                |
+| Audience              | Impressions Weight | Estimated Conversion Rate |
+|-----------------------|---------------------|---------------------------|
+| Small Business Owners | 1.0                 | 2.4%                      |
+| Professional Designers| 0.8                 | 2.2%                      |
+| Digital Marketers     | 1.2                 | 2.6%                      |
+| Students              | 1.5                 | 1.6%                      |
+| Educators             | 0.7                 | 2.0%                      |
+| Non-Profit Orgs       | 0.6                 | 2.2%                      |
+| Enterprise Companies  | 0.9                 | 2.8%                      |
 
 ## For Educators
 
