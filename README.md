@@ -1,5 +1,7 @@
 Check out the working demo [here](https://welovejeff.github.io/ContentStratSim/).
 
+![Sim Screenshot](https://github.com/welovejeff/ContentStratSim/blob/main/Screenshot.png?raw=true)
+
 # Content Strategy Simulator
 
 This interactive tool is designed to help students and professionals alike dive into the world of content strategy, budget allocation, and performance metrics. By simulating real-world decision-making scenarios for Canva's marketing efforts, users can gain hands-on experience in strategic planning and analysis.
