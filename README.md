@@ -26,12 +26,14 @@ Below are the weights used to calculate the estimated performance metrics for ea
 
 | Channel               | Impressions Weight | Estimated Conversion Rate |
 |-----------------------|---------------------|---------------------------|
-| Podcast Sponsorships  | 0.8                 | 2.2%                      |
+| Podcasts              | 0.8                 | 2.2%                      |
 | Social Media          | 1.2                 | 1.8%                      |
-| Blog                  | 0.5                 | 2.0%                      |
+| Blogs                 | 0.5                 | 2.0%                      |
 | Email Marketing       | 0.3                 | 2.6%                      |
 | SEO                   | 1.0                 | 2.4%                      |
-| PPC Advertising       | 1.5                 | 2.6%                      |
+| Ebooks                | 0.4                 | 2.1%                      |
+| Community Building    | 0.7                 | 2.3%                      |
+| Influencers           | 1.5                 | 2.5%                      |
 
 | Audience              | Impressions Weight | Estimated Conversion Rate |
 |-----------------------|---------------------|---------------------------|
@@ -40,8 +42,9 @@ Below are the weights used to calculate the estimated performance metrics for ea
 | Digital Marketers     | 1.2                 | 2.6%                      |
 | Students              | 1.5                 | 1.6%                      |
 | Educators             | 0.7                 | 2.0%                      |
-| Non-Profit Orgs       | 0.6                 | 2.2%                      |
+| Govt / Non-Profit Orgs| 0.6                 | 2.2%                      |
 | Enterprise Companies  | 0.9                 | 2.8%                      |
+| Job Seekers           | 1.1                 | 1.8%                      |
 
 ## For Educators
 
