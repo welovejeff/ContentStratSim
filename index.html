@@ -224,6 +224,15 @@
         #uploadCsv {
             display: none;
         }
+        .github-link {
+            margin-left: 10px;
+            font-size: 24px;
+            color: #bb86fc;
+            text-decoration: none;
+        }
+        .light-theme .github-link {
+            color: #6200ee;
+        }
     </style>
 </head>
 <body>
@@ -231,7 +240,7 @@
     <div class="main-content">
         <img src="Canva_Logo.svg.png" alt="Canva Logo" class="logo">
         <div class="header-container">
-            <h1>Content Strategy Simulator</h1>
+            <h1>Content Strategy Simulator <a href="https://github.com/welovejeff/ContentStratSim" target="_blank" class="github-link"><i class="fab fa-github"></i></a></h1>
             <button onclick="document.getElementById('uploadCsv').click()">Upload Previous Campaign CSV</button>
             <input type="file" id="uploadCsv" accept=".csv" onchange="handleFileUpload(event)">
         </div>
@@ -291,12 +300,14 @@
                     
                     <label for="channel${strategyCount}">Channel (estimated conversion rate):</label>
                     <select id="channel${strategyCount}" name="channel${strategyCount}" required onchange="updateCharts(); updateEstimates();">
-                        <option value="podcast">Podcast Sponsorships (2.2%)</option>
+                        <option value="podcasts">Podcasts (2.2%)</option>
                         <option value="social">Social Media (1.8%)</option>
-                        <option value="blog">Blog (2.0%)</option>
+                        <option value="blogs">Blogs (2.0%)</option>
                         <option value="email">Email Marketing (2.6%)</option>
                         <option value="seo">SEO (2.4%)</option>
-                        <option value="ppc">PPC Advertising (2.6%)</option>
+                        <option value="ebooks">eBooks/Research (2.1%)</option>
+                        <option value="community">Community Building (2.3%)</option>
+                        <option value="influencer">Influencer Content (2.5%)</option>
                     </select>
                     
                     <label for="audience${strategyCount}">Audience Targeting (estimated conversion rate):</label>
@@ -306,8 +317,9 @@
                         <option value="marketers">Digital Marketers (2.6%)</option>
                         <option value="students">Students (1.6%)</option>
                         <option value="educators">Educators (2.0%)</option>
-                        <option value="nonprofits">Non-Profit Organizations (2.2%)</option>
-                        <option value="enterprise">Enterprise Companies (2.8%)</option>
+                        <option value="govt_nonprofit">Govt / Non-Profit Orgs (2.2%)</option>
+                        <option value="enterprise">Enterprise IT Buyers (2.8%)</option>
+                        <option value="job_seekers">Job Seekers (1.8%)</option>
                     </select>
                     
                     <label for="strategy${strategyCount}">Additional Information:</label>
@@ -403,7 +415,7 @@
                 
                 // Adjust rates based on channel
                 switch(channel) {
-                    case 'podcast':
+                    case 'podcasts':
                         impressionRate *= 0.8;
                         channelConversionRate = 0.022;
                         break;
@@ -411,7 +423,7 @@
                         impressionRate *= 1.2;
                         channelConversionRate = 0.018;
                         break;
-                    case 'blog':
+                    case 'blogs':
                         impressionRate *= 0.5;
                         channelConversionRate = 0.020;
                         break;
@@ -423,9 +435,17 @@
                         impressionRate *= 1.0;
                         channelConversionRate = 0.024;
                         break;
-                    case 'ppc':
+                    case 'ebooks':
+                        impressionRate *= 0.4;
+                        channelConversionRate = 0.021;
+                        break;
+                    case 'community':
+                        impressionRate *= 0.7;
+                        channelConversionRate = 0.023;
+                        break;
+                    case 'influencer':
                         impressionRate *= 1.5;
-                        channelConversionRate = 0.026;
+                        channelConversionRate = 0.025;
                         break;
                 }
                 
@@ -451,13 +471,17 @@
                         impressionRate *= 0.7;
                         audienceConversionRate = 0.020;
                         break;
-                    case 'nonprofits':
+                    case 'govt_nonprofit':
                         impressionRate *= 0.6;
                         audienceConversionRate = 0.022;
                         break;
                     case 'enterprise':
                         impressionRate *= 0.9;
                         audienceConversionRate = 0.028;
+                        break;
+                    case 'job_seekers':
+                        impressionRate *= 1.1;
+                        audienceConversionRate = 0.018;
                         break;
                 }
                 
@@ -512,7 +536,7 @@
                     datasets: [{
                         data: values,
                         backgroundColor: [
-                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384'
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#4BC0C0'
                         ]
                     }]
                 },
