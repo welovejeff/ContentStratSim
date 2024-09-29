@@ -2,7 +2,7 @@ NOTE:
 September 28, 2004
 I've branched this out to simple-sim to allow users to find the older, simpler version of tthe content strategy sim.
 
-![Sim Screenshot](https://github.com/welovejeff/ContentStratSim/blob/main/Screenshot.png?raw=true)
+![Sim Screenshot](https://github.com/welovejeff/ContentStratSim/blob/simple-sim/Screenshot.png?raw=true)
 
 # Content Strategy Simulator
 
