@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canva Content Strategy Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="menu-button" onclick="navigateTo('create')">
+            <i class="fas fa-pencil-alt"></i>
+        </div>
+        <div class="menu-button" onclick="navigateTo('analyze')">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="menu-bottom">
+            <a href="https://github.com/welovejeff/ContentStratSim" target="_blank" class="github-link">
+                <i class="fab fa-github"></i>
+            </a>
+            <button id="themeToggle" class="fas fa-moon"></button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <h1>Content Strategy Analyzer</h1>
+        <div class="header-container">
+            <button onclick="document.getElementById('uploadCsv').click()">Upload Campaign Results CSV</button>
+            <input type="file" id="uploadCsv" accept=".csv" onchange="handleFileUpload(event)">
+        </div>
+        <div id="analysisResults"></div>
+    </div>
+
+    <script src="analyze.js"></script>
+</body>
+</html>
