@@ -1,4 +1,6 @@
-Check out the working demo [here](https://welovejeff.github.io/ContentStratSim/).
+NOTE:
+September 28, 2004
+I've branched this out to simple-sim to allow users to find the older, simpler version of tthe content strategy sim.
 
 ![Sim Screenshot](https://github.com/welovejeff/ContentStratSim/blob/main/Screenshot.png?raw=true)
 
