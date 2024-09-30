@@ -17,6 +17,9 @@
         <div class="menu-button" onclick="navigateTo('analyze')">
             <i class="fas fa-chart-bar"></i>
         </div>
+        <div class="menu-button" onclick="navigateTo('learn')">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
         <div class="menu-bottom">
             <a href="https://github.com/welovejeff/ContentStratSim" target="_blank" class="github-link">
                 <i class="fab fa-github"></i>
@@ -32,6 +35,7 @@
             <input type="file" id="uploadCsv" accept=".csv" onchange="handleFileUpload(event)">
         </div>
         <div id="analysisResults"></div>
+        <div id="comparisonResults"></div>
     </div>
 
     <script src="analyze.js"></script>
