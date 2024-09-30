@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn - Content Strategy Simulator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="menu-button" onclick="navigateTo('create')">
+            <i class="fas fa-pencil-alt"></i>
+        </div>
+        <div class="menu-button" onclick="navigateTo('analyze')">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <div class="menu-button active" onclick="navigateTo('learn')">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="menu-bottom">
+            <a href="https://github.com/welovejeff/ContentStratSim" target="_blank" class="github-link">
+                <i class="fab fa-github"></i>
+            </a>
+            <button id="themeToggle" class="fas fa-moon"></button>
+        </div>
+    </div>
+
+    <div class="learn-main-content">
+        <h1 class="learn-title">Learn About Content Strategy</h1>
+        
+        <section class="learn-section learn-key-terms">
+            <h2 class="learn-heading">Key Terms</h2>
+            <dl class="learn-definition-list">
+                <dt class="learn-term">Content Strategy</dt>
+                <dd class="learn-definition">A plan for creating, delivering, and managing content to achieve specific business goals.</dd>
+                
+                <dt class="learn-term">Impressions</dt>
+                <dd class="learn-definition">The number of times your content is displayed, regardless of whether it was clicked or not.</dd>
+                
+                <dt class="learn-term">Conversions</dt>
+                <dd class="learn-definition">The number of users who complete a desired action, such as signing up or making a purchase.</dd>
+                
+                <dt class="learn-term">Conversion Rate</dt>
+                <dd class="learn-definition">The percentage of users who complete a desired action out of the total number of impressions.</dd>
+                
+                <dt class="learn-term">CPM (Cost Per Mille)</dt>
+                <dd class="learn-definition">The cost per thousand impressions, used to measure the cost-effectiveness of an advertising campaign.</dd>
+                
+                <dt class="learn-term">CPC (Cost Per Conversion)</dt>
+                <dd class="learn-definition">The amount an advertiser pays for each conversion (desired action) resulting from their campaign.</dd>
+                
+                <dt class="learn-term">ROI (Return on Investment)</dt>
+                <dd class="learn-definition">A measure of the profitability of an investment, calculated by dividing the net profit by the cost of the investment.</dd>
+                
+                <!-- Add more terms as needed -->
+            </dl>
+        </section>
+        
+        <!-- New section on campaign performance analysis -->
+        <section class="learn-section learn-performance-analysis">
+            <h2 class="learn-heading">Campaign Performance Analysis</h2>
+            <p class="learn-paragraph">Understanding how to evaluate campaign performance is crucial for effective content strategy. Here are some key aspects to consider:</p>
+            
+            <h3 class="learn-subheading">Calculating CPM and CPC</h3>
+            <p class="learn-paragraph">To calculate CPM: (Total Cost / Number of Impressions) x 1000</p>
+            <p class="learn-paragraph">To calculate CPC: Total Cost / Number of Conversions</p>
+            
+            <h3 class="learn-subheading">Importance of CPM and CPC</h3>
+            <p class="learn-paragraph">CPM and CPC are crucial metrics for determining the effectiveness of your campaign:</p>
+            <ul class="learn-list">
+                <li class="learn-list-item">CPM helps you understand the cost-efficiency of your reach. A lower CPM means you're getting more impressions for your budget, which is especially important for brand awareness campaigns.</li>
+                <li class="learn-list-item">CPC (Cost Per Conversion) directly ties your spending to your campaign goals. It helps you understand how much you're paying for each desired action, allowing you to assess the ROI of your campaign.</li>
+                <li class="learn-list-item">By comparing CPM and CPC across different campaigns or channels, you can identify which strategies are most cost-effective for reaching your audience and achieving your goals.</li>
+                <li class="learn-list-item">These metrics allow you to optimize your budget allocation. For example, you might shift budget to channels with lower CPM for awareness campaigns, or to those with lower CPC for conversion-focused campaigns.</li>
+            </ul>
+            
+            <h3 class="learn-subheading">Other Performance Indicators</h3>
+            <ul class="learn-list">
+                <li class="learn-list-item">Click-Through Rate (CTR): Clicks / Impressions</li>
+                <li class="learn-list-item">Conversion Rate: Conversions / Clicks</li>
+                <li class="learn-list-item">Return on Ad Spend (ROAS): Revenue / Ad Spend</li>
+            </ul>
+            
+            <p class="learn-paragraph">By analyzing these metrics together, you can gain a comprehensive understanding of your campaign's performance and make data-driven decisions to improve your content strategy.</p>
+        </section>
+        
+        <section class="learn-section learn-interactive">
+            <h2 class="learn-heading">Interactive Campaign Cost Simulator</h2>
+            <p class="learn-paragraph">Select a channel and audience to see how they affect CPM and CPC for a $1,000 budget:</p>
+            
+            <div class="simulator-controls">
+                <label for="channel-select">Channel:</label>
+                <select id="channel-select"></select>
+                
+                <label for="audience-select">Audience:</label>
+                <select id="audience-select"></select>
+            </div>
+            
+            <div class="simulator-results">
+                <div class="cost-display">
+                    <div class="cost-item">
+                        <h3>CPM</h3>
+                        <p id="cpm-value">$0.00</p>
+                    </div>
+                    <div class="cost-item">
+                        <h3>CPC</h3>
+                        <p id="cpc-value">$0.00</p>
+                    </div>
+                </div>
+                <div class="cost-display">
+                    <div class="cost-item">
+                        <h3>Estimated Impressions</h3>
+                        <p id="impressions-value">0</p>
+                    </div>
+                    <div class="cost-item">
+                        <h3>Estimated Conversions</h3>
+                        <p id="conversions-value">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cost-explanation">
+                <h3 class="learn-subheading">How Costs Vary by Channel and Audience</h3>
+                <p class="learn-paragraph">
+                    The cost of reaching and converting your audience can vary significantly based on the channel you use and the specific audience you're targeting. Here's a brief overview:
+                </p>
+                <ul class="learn-list">
+                    <li class="learn-list-item"><strong>Channels:</strong> Different channels have varying levels of competition and targeting capabilities, which affect costs. For example, some channels might have higher CPMs due to their reach, while others might offer lower CPCs for more targeted campaigns.</li>
+                    <li class="learn-list-item"><strong>Audiences:</strong> More specific or valuable audiences often come with different costs. Some audiences might be more expensive to reach but could offer better engagement or conversion rates.</li>
+                    <li class="learn-list-item"><strong>Engagement:</strong> The level of engagement an audience has with a particular channel can affect both CPM and CPC. Highly engaged audiences might result in lower CPCs despite potentially higher CPMs.</li>
+                    <li class="learn-list-item"><strong>Competition:</strong> Popular channels and audiences with many advertisers competing for attention will generally have higher costs.</li>
+                </ul>
+                <p class="learn-paragraph">
+                    By understanding these factors, you can make informed decisions about where to allocate your budget for the best return on investment. Always test different combinations and monitor performance to optimize your strategy.
+                </p>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // This script assumes that the audiences and channels data is available globally
+        // from your script.js file. If it's not, you'll need to modify this to load the data.
+
+        function populateDropdowns() {
+            const channelSelect = document.getElementById('channel-select');
+            const audienceSelect = document.getElementById('audience-select');
+
+            // Populate channels dropdown
+            const channels = [
+                { value: 'podcasts', name: 'Podcasts' },
+                { value: 'social', name: 'Social Media' },
+                { value: 'blogs', name: 'Blogs' },
+                { value: 'email', name: 'Email Marketing' },
+                { value: 'seo', name: 'SEO' },
+                { value: 'ebooks', name: 'eBooks/Research' },
+                { value: 'community', name: 'Community Building' },
+                { value: 'influencer', name: 'Influencer Content' }
+            ];
+
+            channels.forEach(channel => {
+                const option = document.createElement('option');
+                option.value = channel.value;
+                option.textContent = channel.name;
+                channelSelect.appendChild(option);
+            });
+
+            // Populate audiences dropdown
+            const audiences = [
+                { value: 'small_business', name: 'Small Business Owners' },
+                { value: 'designers', name: 'Professional Designers' },
+                { value: 'marketers', name: 'Digital Marketers' },
+                { value: 'students', name: 'Students' },
+                { value: 'educators', name: 'Educators' },
+                { value: 'govt_nonprofit', name: 'Govt / Non-Profit Orgs' },
+                { value: 'enterprise', name: 'Enterprise Companies' },
+                { value: 'job_seekers', name: 'Job Seekers' }
+            ];
+
+            audiences.forEach(audience => {
+                const option = document.createElement('option');
+                option.value = audience.value;
+                option.textContent = audience.name;
+                audienceSelect.appendChild(option);
+            });
+        }
+
+        function updateCosts() {
+            const selectedChannel = document.getElementById('channel-select').value;
+            const selectedAudience = document.getElementById('audience-select').value;
+            const budget = 1000; // Fixed budget of $1,000
+
+            // Updated values to match the provided parameters
+            const channelData = {
+                podcasts: { impressionsWeight: 0.8, conversionRate: 0.022 },
+                social: { impressionsWeight: 1.2, conversionRate: 0.018 },
+                blogs: { impressionsWeight: 0.5, conversionRate: 0.020 },
+                email: { impressionsWeight: 0.3, conversionRate: 0.026 },
+                seo: { impressionsWeight: 1.0, conversionRate: 0.024 },
+                ebooks: { impressionsWeight: 0.4, conversionRate: 0.021 },
+                community: { impressionsWeight: 0.7, conversionRate: 0.023 },
+                influencer: { impressionsWeight: 1.5, conversionRate: 0.025 }
+            };
+
+            const audienceData = {
+                small_business: { impressionsWeight: 1.0, conversionRate: 0.024 },
+                designers: { impressionsWeight: 0.8, conversionRate: 0.023 },
+                marketers: { impressionsWeight: 1.2, conversionRate: 0.025 },
+                students: { impressionsWeight: 1.5, conversionRate: 0.022 },
+                educators: { impressionsWeight: 0.7, conversionRate: 0.024 },
+                govt_nonprofit: { impressionsWeight: 0.6, conversionRate: 0.026 },
+                enterprise: { impressionsWeight: 0.9, conversionRate: 0.027 },
+                job_seekers: { impressionsWeight: 1.1, conversionRate: 0.021 }
+            };
+
+            const channel = channelData[selectedChannel];
+            const audience = audienceData[selectedAudience];
+
+            if (channel && audience) {
+                // Calculate CPM (cost per thousand impressions)
+                const cpm = channel.impressionsWeight * audience.impressionsWeight;
+
+                // Calculate impressions
+                const impressions = Math.floor((budget / cpm) * 1000);
+
+                // Calculate conversions
+                const conversions = Math.floor(impressions * channel.conversionRate * audience.conversionRate);
+
+                // Calculate CPC (cost per conversion)
+                const cpc = budget / conversions;
+
+                document.getElementById('cpm-value').textContent = `$${cpm.toFixed(2)}`;
+                document.getElementById('cpc-value').textContent = `$${cpc.toFixed(2)}`;
+                document.getElementById('impressions-value').textContent = impressions.toLocaleString();
+                document.getElementById('conversions-value').textContent = conversions.toLocaleString();
+            }
+        }
+
+        // Initialize dropdowns and costs
+        populateDropdowns();
+        updateCosts();
+
+        // Add event listeners
+        document.getElementById('channel-select').addEventListener('change', updateCosts);
+        document.getElementById('audience-select').addEventListener('change', updateCosts);
+    </script>
+</body>
+</html>
