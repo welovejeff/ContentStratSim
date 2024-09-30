@@ -4,6 +4,10 @@ function navigateTo(page) {
     } else if (page === 'analyze') {
         // Already on the analyze page, do nothing or refresh
         console.log('Already on Analyze page');
+    } else if (page === 'learn') {
+        window.location.href = 'learn.html';
+    } else {
+        console.log('Unknown page:', page);
     }
 }
 
@@ -48,13 +52,13 @@ function analyzeResults(data) {
             audience: row['Audience'],
             impressions: impressions,
             conversions: conversions,
-            cpi: impressions > 0 ? budget / impressions : 0,
+            cpm: impressions > 0 ? (budget / impressions) * 1000 : 0, // Changed from cpi to cpm
             cpc: conversions > 0 ? budget / conversions : 0,
             conversionRate: impressions > 0 ? (conversions / impressions) * 100 : 0
         });
     });
 
-    results.overallCPI = results.totalImpressions > 0 ? results.totalBudget / results.totalImpressions : 0;
+    results.overallCPM = results.totalImpressions > 0 ? (results.totalBudget / results.totalImpressions) * 1000 : 0; // Changed from overallCPI to overallCPM
     results.overallCPC = results.totalConversions > 0 ? results.totalBudget / results.totalConversions : 0;
     results.overallConversionRate = results.totalImpressions > 0 ? (results.totalConversions / results.totalImpressions) * 100 : 0;
 
@@ -62,15 +66,39 @@ function analyzeResults(data) {
 }
 
 function displayResults(results) {
+    // Assume we have access to the estimated values from when the campaign was created
+    const estimates = {
+        totalImpressions: 1000000, // Example value, replace with actual estimate
+        totalConversions: 10000, // Example value, replace with actual estimate
+        overallCPM: 100, // Example value, replace with actual estimate
+        overallCPC: 10, // Example value, replace with actual estimate
+        overallConversionRate: 1 // Example value, replace with actual estimate
+    };
+
+    const compareValue = (actual, estimated, isCurrency = false, isPercentage = false) => {
+        const diff = ((actual - estimated) / estimated) * 100;
+        const color = diff >= 0 ? 'green' : 'red';
+        const symbol = diff >= 0 ? '▲' : '▼';
+        let formattedEstimate = estimated;
+        if (isCurrency) {
+            formattedEstimate = '$' + estimated.toFixed(2);
+        } else if (isPercentage) {
+            formattedEstimate = estimated.toFixed(2) + '%';
+        } else {
+            formattedEstimate = estimated.toLocaleString();
+        }
+        return `<span style="color: #999; font-size: 0.8em;">${formattedEstimate}</span> <span style="color: ${color}; font-size: 0.8em;">${symbol} ${Math.abs(diff).toFixed(2)}%</span>`;
+    };
+
     const resultsContainer = document.createElement('div');
     resultsContainer.innerHTML = `
         <h2>Campaign Analysis Results</h2>
         <p>Total Budget: $${results.totalBudget.toLocaleString()}</p>
-        <p>Total Impressions: ${results.totalImpressions.toLocaleString()}</p>
-        <p>Total Conversions: ${results.totalConversions.toLocaleString()}</p>
-        <p>Overall CPI: $${results.overallCPI.toFixed(2)}</p>
-        <p>Overall CPC: $${results.overallCPC.toFixed(2)}</p>
-        <p>Overall Conversion Rate: ${results.overallConversionRate.toFixed(2)}%</p>
+        <p>Total Impressions: ${results.totalImpressions.toLocaleString()} ${compareValue(results.totalImpressions, estimates.totalImpressions)}</p>
+        <p>Total Conversions: ${results.totalConversions.toLocaleString()} ${compareValue(results.totalConversions, estimates.totalConversions)}</p>
+        <p>Overall CPM: $${results.overallCPM.toFixed(2)} ${compareValue(results.overallCPM, estimates.overallCPM, true)}</p>
+        <p>Overall CPC: $${results.overallCPC.toFixed(2)} ${compareValue(results.overallCPC, estimates.overallCPC, true)}</p>
+        <p>Overall Conversion Rate: ${results.overallConversionRate.toFixed(2)}% ${compareValue(results.overallConversionRate, estimates.overallConversionRate, false, true)}</p>
         <h3>Strategy Performance</h3>
         <table id="strategyTable">
             <thead>
@@ -81,25 +109,34 @@ function displayResults(results) {
                     <th>Audience</th>
                     <th>Impressions</th>
                     <th>Conversions</th>
-                    <th>CPI</th>
+                    <th>CPM</th>
                     <th>CPC</th>
                     <th>Conversion Rate</th>
                 </tr>
             </thead>
             <tbody>
-                ${results.strategies.map(strategy => `
+                ${results.strategies.map(strategy => {
+                    // Assume we have access to estimated values for each strategy
+                    const strategyEstimates = {
+                        impressions: 200000, // Example value, replace with actual estimate
+                        conversions: 2000, // Example value, replace with actual estimate
+                        cpm: 100, // Example value, replace with actual estimate
+                        cpc: 10, // Example value, replace with actual estimate
+                        conversionRate: 1 // Example value, replace with actual estimate
+                    };
+                    return `
                     <tr>
                         <td>${strategy.name}</td>
                         <td>$${strategy.budget.toLocaleString()}</td>
                         <td>${strategy.channel}</td>
                         <td>${strategy.audience}</td>
-                        <td>${strategy.impressions.toLocaleString()}</td>
-                        <td>${strategy.conversions.toLocaleString()}</td>
-                        <td>$${strategy.cpi.toFixed(2)}</td>
-                        <td>$${strategy.cpc.toFixed(2)}</td>
-                        <td>${strategy.conversionRate.toFixed(2)}%</td>
+                        <td>${strategy.impressions.toLocaleString()} ${compareValue(strategy.impressions, strategyEstimates.impressions)}</td>
+                        <td>${strategy.conversions.toLocaleString()} ${compareValue(strategy.conversions, strategyEstimates.conversions)}</td>
+                        <td>$${strategy.cpm.toFixed(2)} ${compareValue(strategy.cpm, strategyEstimates.cpm, true)}</td>
+                        <td>$${strategy.cpc.toFixed(2)} ${compareValue(strategy.cpc, strategyEstimates.cpc, true)}</td>
+                        <td>${strategy.conversionRate.toFixed(2)}% ${compareValue(strategy.conversionRate, strategyEstimates.conversionRate, false, true)}</td>
                     </tr>
-                `).join('')}
+                `}).join('')}
             </tbody>
         </table>
     `;
