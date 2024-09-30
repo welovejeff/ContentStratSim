@@ -442,12 +442,16 @@ function populateStrategiesFromCSV(data) {
 }
 
 function navigateTo(page) {
-    if (page === 'create') {
-        // Already on the create page, do nothing or refresh
-        console.log('Already on Create page');
-    } else if (page === 'analyze') {
-        // Redirect to the Analyze page
-        window.location.href = 'analyze.html';
+    switch(page) {
+        case 'create':
+            window.location.href = 'index.html';
+            break;
+        case 'analyze':
+            window.location.href = 'analyze.html';
+            break;
+        case 'learn':
+            window.location.href = 'learn.html';
+            break;
     }
 }
 
