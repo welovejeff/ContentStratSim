@@ -1,3 +1,68 @@
+// Constants
+const BASE_IMPRESSION_RATE = 10;
+const BASE_CONVERSION_RATE = 0.02;
+
+// Helper functions
+function getChannelMultiplier(channel) {
+    const multipliers = {
+        'podcasts': 0.8,
+        'social': 1.2,
+        'blogs': 0.5,
+        'email': 0.3,
+        'seo': 1.0,
+        'ebooks': 0.4,
+        'community': 0.7,
+        'influencer': 1.5
+    };
+    return multipliers[channel.toLowerCase()] || 1;
+}
+
+function getChannelConversionRate(channel) {
+    const rates = {
+        'podcasts': 0.022,
+        'social': 0.018,
+        'blogs': 0.020,
+        'email': 0.026,
+        'seo': 0.024,
+        'ebooks': 0.021,
+        'community': 0.023,
+        'influencer': 0.025
+    };
+    return rates[channel.toLowerCase()] || 0.02;
+}
+
+function getAudienceMultiplier(audience) {
+    const multipliers = {
+        'small_business': 1.0,
+        'designers': 0.8,
+        'marketers': 1.2,
+        'students': 1.5,
+        'educators': 0.7,
+        'govt_nonprofit': 0.6,
+        'enterprise': 0.9,
+        'job_seekers': 1.1
+    };
+    return multipliers[audience.toLowerCase()] || 1;
+}
+
+function getAudienceConversionRate(audience) {
+    const rates = {
+        'small_business': 0.024,
+        'designers': 0.022,
+        'marketers': 0.026,
+        'students': 0.016,
+        'educators': 0.020,
+        'govt_nonprofit': 0.022,
+        'enterprise': 0.028,
+        'job_seekers': 0.018
+    };
+    return rates[audience.toLowerCase()] || 0.02;
+}
+
+function parseBudget(budgetString) {
+    return parseInt(budgetString.replace(/[^0-9]/g, ''));
+}
+
 function navigateTo(page) {
     if (page === 'create') {
         window.location.href = 'index.html';
@@ -31,52 +96,69 @@ function handleFileUpload(event) {
 function analyzeResults(data) {
     const results = {
         totalBudget: 0,
-        totalImpressions: 0,
-        totalConversions: 0,
+        totalActualImpressions: 0,
+        totalActualConversions: 0,
+        totalEstimatedImpressions: 0,
+        totalEstimatedConversions: 0,
         strategies: []
     };
 
     data.forEach(row => {
-        const budget = parseInt(row['Budget'].replace(/[^0-9]/g, ''));
-        const impressions = parseInt(row['Actual Impressions'] || 0);
-        const conversions = parseInt(row['Actual Conversions'] || 0);
+        const budget = parseBudget(row['Budget']);
+        const actualImpressions = parseInt(row['Actual Impressions'] || 0);
+        const actualConversions = parseInt(row['Actual Conversions'] || 0);
+        const channel = row['Channel'];
+        const audience = row['Audience'];
+
+        const channelMultiplier = getChannelMultiplier(channel);
+        const audienceMultiplier = getAudienceMultiplier(audience);
+        const channelConversionRate = getChannelConversionRate(channel);
+        const audienceConversionRate = getAudienceConversionRate(audience);
+
+        const estimatedImpressions = Math.round(budget * BASE_IMPRESSION_RATE * channelMultiplier * audienceMultiplier);
+        const estimatedConversionRate = (channelConversionRate + audienceConversionRate) / 2;
+        const estimatedConversions = Math.round(estimatedImpressions * estimatedConversionRate);
 
         results.totalBudget += budget;
-        results.totalImpressions += impressions;
-        results.totalConversions += conversions;
+        results.totalActualImpressions += actualImpressions;
+        results.totalActualConversions += actualConversions;
+        results.totalEstimatedImpressions += estimatedImpressions;
+        results.totalEstimatedConversions += estimatedConversions;
 
         results.strategies.push({
             name: row['Campaign Name'],
-            budget: budget,
-            channel: row['Channel'],
-            audience: row['Audience'],
-            impressions: impressions,
-            conversions: conversions,
-            cpm: impressions > 0 ? (budget / impressions) * 1000 : 0, // Changed from cpi to cpm
-            cpc: conversions > 0 ? budget / conversions : 0,
-            conversionRate: impressions > 0 ? (conversions / impressions) * 100 : 0
+            budget,
+            channel,
+            audience,
+            actualImpressions,
+            actualConversions,
+            estimatedImpressions,
+            estimatedConversions,
+            channelMultiplier,
+            audienceMultiplier,
+            estimatedConversionRate
         });
     });
 
-    results.overallCPM = results.totalImpressions > 0 ? (results.totalBudget / results.totalImpressions) * 1000 : 0; // Changed from overallCPI to overallCPM
-    results.overallCPC = results.totalConversions > 0 ? results.totalBudget / results.totalConversions : 0;
-    results.overallConversionRate = results.totalImpressions > 0 ? (results.totalConversions / results.totalImpressions) * 100 : 0;
-
+    calculateOverallMetrics(results);
+    console.log("Final results:", results);
     displayResults(results);
 }
 
-function displayResults(results) {
-    // Assume we have access to the estimated values from when the campaign was created
-    const estimates = {
-        totalImpressions: 1000000, // Example value, replace with actual estimate
-        totalConversions: 10000, // Example value, replace with actual estimate
-        overallCPM: 100, // Example value, replace with actual estimate
-        overallCPC: 10, // Example value, replace with actual estimate
-        overallConversionRate: 1 // Example value, replace with actual estimate
-    };
+function calculateOverallMetrics(results) {
+    results.overallActualCPM = results.totalActualImpressions > 0 ? (results.totalBudget / results.totalActualImpressions) * 1000 : 0;
+    results.overallActualCPC = results.totalActualConversions > 0 ? results.totalBudget / results.totalActualConversions : 0;
+    results.overallActualConversionRate = results.totalActualImpressions > 0 ? (results.totalActualConversions / results.totalActualImpressions) * 100 : 0;
 
+    results.overallEstimatedCPM = results.totalEstimatedImpressions > 0 ? (results.totalBudget / results.totalEstimatedImpressions) * 1000 : 0;
+    results.overallEstimatedCPC = results.totalEstimatedConversions > 0 ? results.totalBudget / results.totalEstimatedConversions : 0;
+    results.overallEstimatedConversionRate = results.totalEstimatedImpressions > 0 ? (results.totalEstimatedConversions / results.totalEstimatedImpressions) * 100 : 0;
+}
+
+function displayResults(results) {
     const compareValue = (actual, estimated, isCurrency = false, isPercentage = false) => {
-        const diff = ((actual - estimated) / estimated) * 100;
+        const diff = actual - estimated;
+        const percentDiff = estimated !== 0 ? (diff / estimated) * 100 : 0;
         const color = diff >= 0 ? 'green' : 'red';
         const symbol = diff >= 0 ? '▲' : '▼';
         let formattedEstimate = estimated;
@@ -87,18 +169,21 @@ function displayResults(results) {
         } else {
             formattedEstimate = estimated.toLocaleString();
         }
-        return `<span style="color: #999; font-size: 0.8em;">${formattedEstimate}</span> <span style="color: ${color}; font-size: 0.8em;">${symbol} ${Math.abs(diff).toFixed(2)}%</span>`;
+        return `<span style="color: #999; font-size: 0.8em;">${formattedEstimate}</span> <span style="color: ${color}; font-size: 0.8em;">${symbol} ${Math.abs(percentDiff).toFixed(2)}%</span>`;
     };
 
-    const resultsContainer = document.createElement('div');
+    const calculateCPM = (budget, impressions) => impressions > 0 ? (budget / impressions) * 1000 : 0;
+    const calculateCPC = (budget, conversions) => conversions > 0 ? budget / conversions : 0;
+
+    const resultsContainer = document.getElementById('analysisResults');
     resultsContainer.innerHTML = `
         <h2>Campaign Analysis Results</h2>
         <p>Total Budget: $${results.totalBudget.toLocaleString()}</p>
-        <p>Total Impressions: ${results.totalImpressions.toLocaleString()} ${compareValue(results.totalImpressions, estimates.totalImpressions)}</p>
-        <p>Total Conversions: ${results.totalConversions.toLocaleString()} ${compareValue(results.totalConversions, estimates.totalConversions)}</p>
-        <p>Overall CPM: $${results.overallCPM.toFixed(2)} ${compareValue(results.overallCPM, estimates.overallCPM, true)}</p>
-        <p>Overall CPC: $${results.overallCPC.toFixed(2)} ${compareValue(results.overallCPC, estimates.overallCPC, true)}</p>
-        <p>Overall Conversion Rate: ${results.overallConversionRate.toFixed(2)}% ${compareValue(results.overallConversionRate, estimates.overallConversionRate, false, true)}</p>
+        <p>Total Impressions: ${results.totalActualImpressions.toLocaleString()} ${compareValue(results.totalActualImpressions, results.totalEstimatedImpressions)}</p>
+        <p>Total Conversions: ${results.totalActualConversions.toLocaleString()} ${compareValue(results.totalActualConversions, results.totalEstimatedConversions)}</p>
+        <p>Overall CPM: $${results.overallActualCPM.toFixed(2)} ${compareValue(results.overallActualCPM, results.overallEstimatedCPM, true)}</p>
+        <p>Overall CPC: $${results.overallActualCPC.toFixed(2)} ${compareValue(results.overallActualCPC, results.overallEstimatedCPC, true)}</p>
+        <p>Overall Conversion Rate: ${results.overallActualConversionRate.toFixed(2)}% ${compareValue(results.overallActualConversionRate, results.overallEstimatedConversionRate, false, true)}</p>
         <h3>Strategy Performance</h3>
         <table id="strategyTable">
             <thead>
@@ -111,37 +196,30 @@ function displayResults(results) {
                     <th>Conversions</th>
                     <th>CPM</th>
                     <th>CPC</th>
-                    <th>Conversion Rate</th>
                 </tr>
             </thead>
             <tbody>
                 ${results.strategies.map(strategy => {
-                    // Assume we have access to estimated values for each strategy
-                    const strategyEstimates = {
-                        impressions: 200000, // Example value, replace with actual estimate
-                        conversions: 2000, // Example value, replace with actual estimate
-                        cpm: 100, // Example value, replace with actual estimate
-                        cpc: 10, // Example value, replace with actual estimate
-                        conversionRate: 1 // Example value, replace with actual estimate
-                    };
+                    const actualCPM = calculateCPM(strategy.budget, strategy.actualImpressions);
+                    const estimatedCPM = calculateCPM(strategy.budget, strategy.estimatedImpressions);
+                    const actualCPC = calculateCPC(strategy.budget, strategy.actualConversions);
+                    const estimatedCPC = calculateCPC(strategy.budget, strategy.estimatedConversions);
                     return `
                     <tr>
                         <td>${strategy.name}</td>
                         <td>$${strategy.budget.toLocaleString()}</td>
                         <td>${strategy.channel}</td>
                         <td>${strategy.audience}</td>
-                        <td>${strategy.impressions.toLocaleString()} ${compareValue(strategy.impressions, strategyEstimates.impressions)}</td>
-                        <td>${strategy.conversions.toLocaleString()} ${compareValue(strategy.conversions, strategyEstimates.conversions)}</td>
-                        <td>$${strategy.cpm.toFixed(2)} ${compareValue(strategy.cpm, strategyEstimates.cpm, true)}</td>
-                        <td>$${strategy.cpc.toFixed(2)} ${compareValue(strategy.cpc, strategyEstimates.cpc, true)}</td>
-                        <td>${strategy.conversionRate.toFixed(2)}% ${compareValue(strategy.conversionRate, strategyEstimates.conversionRate, false, true)}</td>
+                        <td>${strategy.actualImpressions.toLocaleString()} ${compareValue(strategy.actualImpressions, strategy.estimatedImpressions)}</td>
+                        <td>${strategy.actualConversions.toLocaleString()} ${compareValue(strategy.actualConversions, strategy.estimatedConversions)}</td>
+                        <td>$${actualCPM.toFixed(2)} ${compareValue(actualCPM, estimatedCPM, true)}</td>
+                        <td>$${actualCPC.toFixed(2)} ${compareValue(actualCPC, estimatedCPC, true)}</td>
                     </tr>
                 `}).join('')}
             </tbody>
         </table>
     `;
 
-    document.querySelector('.main-content').appendChild(resultsContainer);
     createPerformanceCharts(results);
 }
 
@@ -192,9 +270,13 @@ function createConversionRateChart(strategies) {
         data: {
             labels: strategies.map(s => s.name),
             datasets: [{
-                label: 'Conversion Rate (%)',
-                data: strategies.map(s => s.conversionRate),
+                label: 'Actual Conversion Rate (%)',
+                data: strategies.map(s => (s.actualConversions / s.actualImpressions) * 100),
                 backgroundColor: '#36A2EB'
+            }, {
+                label: 'Estimated Conversion Rate (%)',
+                data: strategies.map(s => s.estimatedConversionRate * 100),
+                backgroundColor: '#FF6384'
             }]
         },
         options: {
@@ -243,3 +325,32 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.setItem('theme', theme);
     });
 });
+
+function displayAnalysisResults(data) {
+    const resultsDiv = document.getElementById('analysisResults');
+    resultsDiv.innerHTML = '';
+
+    data.forEach(campaign => {
+        const campaignDiv = document.createElement('div');
+        campaignDiv.className = 'campaign-result';
+        campaignDiv.innerHTML = `
+            <h2>${campaign.name}</h2>
+            <p>Actual Impressions: ${campaign.actualImpressions.toLocaleString()} 
+               (Estimated: ${campaign.estimatedImpressions.toLocaleString()}, 
+               ${calculatePercentageDiff(campaign.estimatedImpressions, campaign.actualImpressions)}% difference)</p>
+            <p>Actual Conversions: ${campaign.actualConversions.toLocaleString()} 
+               (Estimated: ${campaign.estimatedConversions.toLocaleString()}, 
+               ${calculatePercentageDiff(campaign.estimatedConversions, campaign.actualConversions)}% difference)</p>
+            <p>Cost per Conversion: $${(campaign.cost / campaign.actualConversions).toFixed(2)}</p>
+            <canvas id="chart-${campaign.name}"></canvas>
+        `;
+        resultsDiv.appendChild(campaignDiv);
+
+        // ... (rest of the function remains unchanged)
+    });
+}
+
+// Add this helper function if it doesn't exist
+function calculatePercentageDiff(estimated, actual) {
+    return (((actual - estimated) / estimated) * 100).toFixed(2);
+}
