@@ -4,7 +4,62 @@ const charts = {
     channelChart: null
 };
 
-function addStrategy() {
+function saveStrategiesToLocalStorage() {
+    const strategies = [];
+    document.querySelectorAll('.strategy-section').forEach((strategy, index) => {
+        const strategyData = {
+            campaignName: strategy.querySelector(`input[name^="campaignName"]`).value,
+            budget: strategy.querySelector(`input[name^="budget"]`).value,
+            channel: strategy.querySelector(`select[name^="channel"]`).value,
+            audience: strategy.querySelector(`select[name^="audience"]`).value,
+            additionalInfo: strategy.querySelector(`textarea[name^="strategy"]`).value
+        };
+        strategies.push(strategyData);
+    });
+
+    const totalBudget = document.getElementById('quarterlyBudget').value;
+    
+    localStorage.setItem('contentStrategies', JSON.stringify({
+        strategies: strategies,
+        totalBudget: totalBudget,
+        strategyCount: strategyCount
+    }));
+}
+
+function loadStrategiesFromLocalStorage() {
+    const savedData = localStorage.getItem('contentStrategies');
+    if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        
+        // Set total budget
+        document.getElementById('quarterlyBudget').value = parsedData.totalBudget;
+        
+        // Clear existing strategies
+        document.getElementById('strategyContainer').innerHTML = '';
+        strategyCount = 0; // Reset strategy count
+
+        // Recreate strategies
+        parsedData.strategies.forEach((strategyData, index) => {
+            addStrategy(false); // Pass false to prevent saving during loading
+            const strategySection = document.querySelectorAll('.strategy-section')[index];
+            
+            if (strategySection) {
+                strategySection.querySelector('input[name^="campaignName"]').value = strategyData.campaignName || '';
+                strategySection.querySelector('input[name^="budget"]').value = strategyData.budget || '0';
+                strategySection.querySelector('select[name^="channel"]').value = strategyData.channel || '';
+                strategySection.querySelector('select[name^="audience"]').value = strategyData.audience || '';
+                strategySection.querySelector('textarea[name^="strategy"]').value = strategyData.additionalInfo || '';
+                updateStrategyEstimates(strategySection);
+            }
+        });
+
+        updateTotalBudget();
+        updateCharts();
+        updateStrategyList();
+    }
+}
+
+function addStrategy(shouldSave = true) {
     strategyCount++;
     const container = document.getElementById('strategyContainer');
     const section = document.createElement('div');
@@ -13,6 +68,10 @@ function addStrategy() {
         <div class="strategy-header">
             <h2>Content Strategy #${strategyCount}</h2>
             <button type="button" class="minimize-strategy fas fa-minus" onclick="toggleStrategy(this)"></button>
+        </div>
+        <div class="strategy-estimates">
+            <p class="estimated-impressions">Estimated Impressions: 0</p>
+            <p class="estimated-conversions">Estimated Conversions: 0</p>
         </div>
         <div class="strategy-content">
             <button type="button" class="remove-strategy" onclick="removeStrategy(this)">Remove</button>
@@ -53,6 +112,27 @@ function addStrategy() {
     container.appendChild(section);
     updateTotalBudget();
     updateCharts();
+    updateStrategyEstimates(section);
+    if (shouldSave) {
+        saveStrategiesToLocalStorage();
+    }
+
+    const channelSelect = section.querySelector(`select[name^="channel"]`);
+    const audienceSelect = section.querySelector(`select[name^="audience"]`);
+    
+    channelSelect.addEventListener('change', () => {
+        updateStrategyEstimates(section);
+        updateCharts();
+        updateEstimates();
+        if (shouldSave) saveStrategiesToLocalStorage();
+    });
+    
+    audienceSelect.addEventListener('change', () => {
+        updateStrategyEstimates(section);
+        updateCharts();
+        updateEstimates();
+        if (shouldSave) saveStrategiesToLocalStorage();
+    });
 }
 
 function toggleStrategy(button) {
@@ -67,11 +147,14 @@ function removeStrategy(button) {
     section.parentElement.removeChild(section);
     updateTotalBudget();
     updateCharts();
+    saveStrategiesToLocalStorage();
 }
 
 function updateBudgetValue(input) {
     updateTotalBudget();
     updateCharts();
+    updateStrategyEstimates(input.closest('.strategy-section'));
+    saveStrategiesToLocalStorage();
 }
 
 function updateStrategyList() {
@@ -115,6 +198,10 @@ function updateTotalBudget() {
     const remainingBudget = totalBudget - allocatedBudget;
     totalBudgetDisplayElement.textContent = `Remaining Budget: $${remainingBudget.toLocaleString()}`;
     totalBudgetDisplayElement.className = remainingBudget < 0 ? 'error' : '';
+
+    document.querySelectorAll('.strategy-section').forEach(strategySection => {
+        updateStrategyEstimates(strategySection);
+    });
 
     updateStrategyList();
     updateEstimates();
@@ -465,7 +552,51 @@ function toggleTheme() {
     localStorage.setItem('theme', theme);
 }
 
-// Initialize the page
+function addInputChangeListeners() {
+    document.getElementById('strategyContainer').addEventListener('input', (event) => {
+        if (event.target.matches('input, select, textarea')) {
+            saveStrategiesToLocalStorage();
+        }
+    });
+
+    document.getElementById('quarterlyBudget').addEventListener('change', saveStrategiesToLocalStorage);
+}
+
+// Add these functions at the end of your script.js file
+
+function showResetModal() {
+    document.getElementById('resetModal').style.display = 'block';
+}
+
+function hideResetModal() {
+    document.getElementById('resetModal').style.display = 'none';
+}
+
+function resetAllStrategies() {
+    // Clear localStorage
+    localStorage.removeItem('contentStrategies');
+
+    // Clear strategy container
+    document.getElementById('strategyContainer').innerHTML = '';
+
+    // Reset strategy count
+    strategyCount = 0;
+
+    // Reset total budget to default value
+    document.getElementById('quarterlyBudget').value = '5000000';
+
+    // Add one empty strategy
+    addStrategy();
+
+    // Update UI
+    updateTotalBudget();
+    updateCharts();
+
+    // Hide modal
+    hideResetModal();
+}
+
+// Modify the DOMContentLoaded event listener to include the new reset functionality
 document.addEventListener('DOMContentLoaded', function() {
     // Add theme toggle event listener
     const themeToggle = document.getElementById('themeToggle');
@@ -478,9 +609,21 @@ document.addEventListener('DOMContentLoaded', function() {
         themeToggle.className = 'fas fa-sun';
     }
 
-    // Initialize with one strategy and charts
-    addStrategy();
+    // Load saved strategies
+    loadStrategiesFromLocalStorage();
+
+    // If no strategies were loaded, add one
+    if (document.querySelectorAll('.strategy-section').length === 0) {
+        addStrategy();
+    }
+
+    // Update UI
+    updateTotalBudget();
     updateCharts();
+    updateStrategyList();
+
+    // Add input change listeners
+    addInputChangeListeners();
 
     // Minimize toggle functionality
     const minimizeToggle = document.getElementById('minimizeToggle');
@@ -491,4 +634,286 @@ document.addEventListener('DOMContentLoaded', function() {
             minimizeToggle.className = floatingBudget.classList.contains('minimized') ? 'fas fa-plus' : 'fas fa-minus';
         });
     }
+
+    // Add reset button functionality
+    const resetButton = document.getElementById('resetButton');
+    const confirmResetButton = document.getElementById('confirmReset');
+    const cancelResetButton = document.getElementById('cancelReset');
+
+    resetButton.addEventListener('click', showResetModal);
+    confirmResetButton.addEventListener('click', resetAllStrategies);
+    cancelResetButton.addEventListener('click', hideResetModal);
+
+    // Close modal if user clicks outside of it
+    window.addEventListener('click', function(event) {
+        if (event.target == document.getElementById('resetModal')) {
+            hideResetModal();
+        }
+    });
+});
+
+// Instead, add these event listeners to save when changes are made
+document.getElementById('strategyContainer').addEventListener('input', saveStrategiesToLocalStorage);
+document.getElementById('quarterlyBudget').addEventListener('change', saveStrategiesToLocalStorage);
+
+function updateStrategyEstimates(strategySection) {
+    const budget = parseInt(strategySection.querySelector('input[name^="budget"]').value) || 0;
+    const channel = strategySection.querySelector('select[name^="channel"]').value;
+    const audience = strategySection.querySelector('select[name^="audience"]').value;
+    
+    let impressionRate = 10; // Base rate: 10 impressions per dollar
+    let channelConversionRate = 0.02; // Base rate: 2% conversion rate
+    let audienceConversionRate = 0.02; // Base rate: 2% conversion rate
+    
+    // Adjust rates based on channel
+    switch(channel) {
+        case 'podcasts':
+            impressionRate *= 0.8;
+            channelConversionRate = 0.022;
+            break;
+        case 'social':
+            impressionRate *= 1.2;
+            channelConversionRate = 0.018;
+            break;
+        case 'blogs':
+            impressionRate *= 0.5;
+            channelConversionRate = 0.020;
+            break;
+        case 'email':
+            impressionRate *= 0.3;
+            channelConversionRate = 0.026;
+            break;
+        case 'seo':
+            impressionRate *= 1.0;
+            channelConversionRate = 0.024;
+            break;
+        case 'ebooks':
+            impressionRate *= 0.4;
+            channelConversionRate = 0.021;
+            break;
+        case 'community':
+            impressionRate *= 0.7;
+            channelConversionRate = 0.023;
+            break;
+        case 'influencer':
+            impressionRate *= 1.5;
+            channelConversionRate = 0.025;
+            break;
+    }
+    
+    // Adjust rates based on audience
+    switch(audience) {
+        case 'small_business':
+            impressionRate *= 1.0;
+            audienceConversionRate = 0.024;
+            break;
+        case 'designers':
+            impressionRate *= 0.8;
+            audienceConversionRate = 0.022;
+            break;
+        case 'marketers':
+            impressionRate *= 1.2;
+            audienceConversionRate = 0.026;
+            break;
+        case 'students':
+            impressionRate *= 1.5;
+            audienceConversionRate = 0.016;
+            break;
+        case 'educators':
+            impressionRate *= 0.7;
+            audienceConversionRate = 0.020;
+            break;
+        case 'govt_nonprofit':
+            impressionRate *= 0.6;
+            audienceConversionRate = 0.022;
+            break;
+        case 'enterprise':
+            impressionRate *= 0.9;
+            audienceConversionRate = 0.028;
+            break;
+        case 'job_seekers':
+            impressionRate *= 1.1;
+            audienceConversionRate = 0.018;
+            break;
+    }
+    
+    const strategyConversionRate = (channelConversionRate + audienceConversionRate) / 2;
+    const strategyImpressions = Math.floor(budget * impressionRate);
+    const strategyConversions = Math.floor(strategyImpressions * strategyConversionRate);
+
+    strategySection.querySelector('.estimated-impressions').textContent = `Estimated Impressions: ${strategyImpressions.toLocaleString()}`;
+    strategySection.querySelector('.estimated-conversions').textContent = `Estimated Conversions: ${strategyConversions.toLocaleString()}`;
+}
+
+function loadStrategiesFromLocalStorage() {
+    const savedData = localStorage.getItem('contentStrategies');
+    if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        
+        // Set total budget
+        document.getElementById('quarterlyBudget').value = parsedData.totalBudget;
+        
+        // Clear existing strategies
+        document.getElementById('strategyContainer').innerHTML = '';
+        strategyCount = 0; // Reset strategy count
+
+        // Recreate strategies
+        parsedData.strategies.forEach((strategyData, index) => {
+            addStrategy(false); // Pass false to prevent saving during loading
+            const strategySection = document.querySelectorAll('.strategy-section')[index];
+            
+            if (strategySection) {
+                strategySection.querySelector('input[name^="campaignName"]').value = strategyData.campaignName || '';
+                strategySection.querySelector('input[name^="budget"]').value = strategyData.budget || '0';
+                strategySection.querySelector('select[name^="channel"]').value = strategyData.channel || '';
+                strategySection.querySelector('select[name^="audience"]').value = strategyData.audience || '';
+                strategySection.querySelector('textarea[name^="strategy"]').value = strategyData.additionalInfo || '';
+                updateStrategyEstimates(strategySection);
+            }
+        });
+
+        updateTotalBudget();
+        updateCharts();
+        updateStrategyList();
+    }
+}
+
+// Modify the DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    // Add theme toggle event listener
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', toggleTheme);
+
+    // Check for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        themeToggle.className = 'fas fa-sun';
+    }
+
+    // Load saved strategies
+    loadStrategiesFromLocalStorage();
+
+    // If no strategies were loaded, add one
+    if (document.querySelectorAll('.strategy-section').length === 0) {
+        addStrategy();
+    }
+
+    // Update UI
+    updateTotalBudget();
+    updateCharts();
+    updateStrategyList();
+
+    // Add input change listeners
+    addInputChangeListeners();
+
+    // Minimize toggle functionality
+    const minimizeToggle = document.getElementById('minimizeToggle');
+    const floatingBudget = document.getElementById('floatingBudget');
+    if (minimizeToggle && floatingBudget) {
+        minimizeToggle.addEventListener('click', () => {
+            floatingBudget.classList.toggle('minimized');
+            minimizeToggle.className = floatingBudget.classList.contains('minimized') ? 'fas fa-plus' : 'fas fa-minus';
+        });
+    }
+
+    // Add reset button functionality
+    const resetButton = document.getElementById('resetButton');
+    const confirmResetButton = document.getElementById('confirmReset');
+    const cancelResetButton = document.getElementById('cancelReset');
+
+    resetButton.addEventListener('click', showResetModal);
+    confirmResetButton.addEventListener('click', resetAllStrategies);
+    cancelResetButton.addEventListener('click', hideResetModal);
+
+    // Close modal if user clicks outside of it
+    window.addEventListener('click', function(event) {
+        if (event.target == document.getElementById('resetModal')) {
+            hideResetModal();
+        }
+    });
+});
+
+function showStrategyOverview() {
+    const container = document.getElementById('strategyOverviewContainer');
+    container.innerHTML = '';
+    
+    const strategies = document.querySelectorAll('.strategy-section');
+    strategies.forEach((strategy, index) => {
+        const campaignName = strategy.querySelector('input[name^="campaignName"]').value || `Strategy #${index + 1}`;
+        const budget = parseInt(strategy.querySelector('input[name^="budget"]').value) || 0;
+        const channel = strategy.querySelector('select[name^="channel"]').value;
+        const audience = strategy.querySelector('select[name^="audience"]').value;
+        const additionalInfo = strategy.querySelector('textarea[name^="strategy"]').value;
+        
+        const impressions = strategy.querySelector('.estimated-impressions').textContent;
+        const conversions = strategy.querySelector('.estimated-conversions').textContent;
+        
+        const card = document.createElement('div');
+        card.className = 'strategy-card';
+        card.innerHTML = `
+            <h3>${campaignName}</h3>
+            <p><strong>Budget:</strong> $${budget.toLocaleString()}</p>
+            <p><strong>Channel:</strong> ${channel}</p>
+            <p><strong>Audience:</strong> ${audience}</p>
+            <p>${impressions}</p>
+            <p>${conversions}</p>
+            <p><strong>Additional Info:</strong> ${additionalInfo}</p>
+        `;
+        container.appendChild(card);
+    });
+    
+    document.getElementById('strategyOverviewModal').style.display = 'block';
+}
+
+function downloadStrategyOverviewPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.text("Strategy Overview", 20, 20);
+    
+    let yPosition = 40;
+    const strategies = document.querySelectorAll('.strategy-card');
+    
+    strategies.forEach((strategy, index) => {
+        if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+        }
+        
+        doc.setFontSize(14);
+        doc.text(strategy.querySelector('h3').textContent, 20, yPosition);
+        yPosition += 10;
+        
+        doc.setFontSize(12);
+        strategy.querySelectorAll('p').forEach(p => {
+            if (yPosition > 280) {
+                doc.addPage();
+                yPosition = 20;
+            }
+            doc.text(p.textContent, 20, yPosition);
+            yPosition += 10;
+        });
+        
+        yPosition += 10;
+    });
+    
+    doc.save("strategy_overview.pdf");
+}
+
+function hideStrategyOverview() {
+    document.getElementById('strategyOverviewModal').style.display = 'none';
+}
+
+// Add this to the existing DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing code ...
+
+    // Close strategy overview modal if user clicks outside of it
+    window.addEventListener('click', function(event) {
+        if (event.target == document.getElementById('strategyOverviewModal')) {
+            hideStrategyOverview();
+        }
+    });
 });
