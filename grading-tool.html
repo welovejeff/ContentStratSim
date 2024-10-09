@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Strategy Grading Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .strategy-card {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .light-theme .strategy-card {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+        .adjustment-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .adjustment-controls input[type="number"] {
+            width: 100px;
+        }
+        .adjustment-controls input[type="range"] {
+            width: 100%;
+        }
+        .collapsible {
+            cursor: pointer;
+        }
+        .content {
+            display: none;
+            overflow: hidden;
+        }
+        #floatingTotals {
+            position: fixed;
+            top: 60px; /* Adjusted to make room for the theme toggle */
+            right: 20px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            z-index: 1000;
+        }
+        .light-theme #floatingTotals {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .total-label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .total-value {
+            display: flex;
+            align-items: center;
+        }
+        .estimated-value {
+            color: #888;
+            margin-right: 10px;
+        }
+        .actual-value {
+            font-weight: bold;
+        }
+        .percentage-change {
+            margin-left: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+        }
+        .percentage-change.positive {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .percentage-change.negative {
+            background-color: #F44336;
+            color: white;
+        }
+        #themeToggle {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            vertical-align: middle;
+            margin-left: 10px;
+            color: #bb86fc; /* Purple color to match the text */
+        }
+        .light-theme #themeToggle {
+            color: #6200ee; /* Adjust this color for light theme if needed */
+        }
+        .header-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .comments-section {
+            margin-top: 10px;
+        }
+        .comments-section textarea {
+            width: 100%;
+            height: 60px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="header-container">
+            <h1>Content Strategy Grading Tool</h1>
+            <button id="themeToggle" class="fas fa-moon"></button>
+        </div>
+        <div class="header-container">
+            <button onclick="document.getElementById('uploadCsv').click()">Upload Student CSV</button>
+            <input type="file" id="uploadCsv" accept=".csv" onchange="handleFileUpload(event)">
+        </div>
+        <div id="strategyContainer"></div>
+        <button onclick="saveResults()" style="display: none;" id="saveButton">Save Results</button>
+    </div>
+    <div id="floatingTotals">
+        <h3>Grading: <span id="fileName">No file uploaded</span></h3>
+        <div class="total-row">
+            <span class="total-label">Total Budget:</span>
+            <span class="total-value">$<span id="totalBudget">0</span></span>
+        </div>
+        <div class="total-row">
+            <span class="total-label">Impressions:</span>
+            <div class="total-value">
+                <span class="estimated-value" id="estimatedImpressions">0</span>
+                <span class="actual-value" id="actualImpressions">0</span>
+                <span class="percentage-change" id="impressionsChange"></span>
+            </div>
+        </div>
+        <div class="total-row">
+            <span class="total-label">Conversions:</span>
+            <div class="total-value">
+                <span class="estimated-value" id="estimatedConversions">0</span>
+                <span class="actual-value" id="actualConversions">0</span>
+                <span class="percentage-change" id="conversionsChange"></span>
+            </div>
+        </div>
+    </div>
+    <script src="grading-tool.js"></script>
+</body>
+</html>
