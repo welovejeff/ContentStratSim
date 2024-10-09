@@ -77,14 +77,17 @@ function navigateTo(page) {
 }
 
 function handleFileUpload(event) {
+    console.log("File upload started");
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
+            console.log("File read complete");
             const contents = e.target.result;
             Papa.parse(contents, {
                 header: true,
                 complete: function(results) {
+                    console.log("CSV parsing complete");
                     analyzeResults(results.data);
                 }
             });
@@ -136,7 +139,8 @@ function analyzeResults(data) {
             estimatedConversions,
             channelMultiplier,
             audienceMultiplier,
-            estimatedConversionRate
+            estimatedConversionRate,
+            Comments: row['Comments'] || '' // Add this line to include comments
         });
     });
 
@@ -156,6 +160,7 @@ function calculateOverallMetrics(results) {
 }
 
 function displayResults(results) {
+    console.log("Displaying results:", results);
     const compareValue = (actual, estimated, isCurrency = false, isPercentage = false) => {
         const diff = actual - estimated;
         const percentDiff = estimated !== 0 ? (diff / estimated) * 100 : 0;
@@ -185,45 +190,53 @@ function displayResults(results) {
         <p>Overall CPC: $${results.overallActualCPC.toFixed(2)} ${compareValue(results.overallActualCPC, results.overallEstimatedCPC, true)}</p>
         <p>Overall Conversion Rate: ${results.overallActualConversionRate.toFixed(2)}% ${compareValue(results.overallActualConversionRate, results.overallEstimatedConversionRate, false, true)}</p>
         <h3>Strategy Performance</h3>
-        <table id="strategyTable">
-            <thead>
-                <tr>
-                    <th>Campaign Name</th>
-                    <th>Budget</th>
-                    <th>Channel</th>
-                    <th>Audience</th>
-                    <th>Impressions</th>
-                    <th>Conversions</th>
-                    <th>CPM</th>
-                    <th>CPC</th>
-                </tr>
-            </thead>
-            <tbody>
-                ${results.strategies.map(strategy => {
-                    const actualCPM = calculateCPM(strategy.budget, strategy.actualImpressions);
-                    const estimatedCPM = calculateCPM(strategy.budget, strategy.estimatedImpressions);
-                    const actualCPC = calculateCPC(strategy.budget, strategy.actualConversions);
-                    const estimatedCPC = calculateCPC(strategy.budget, strategy.estimatedConversions);
-                    return `
+        <div class="table-container">
+            <table id="strategyTable">
+                <thead>
                     <tr>
-                        <td>${strategy.name}</td>
-                        <td>$${strategy.budget.toLocaleString()}</td>
-                        <td>${strategy.channel}</td>
-                        <td>${strategy.audience}</td>
-                        <td>${strategy.actualImpressions.toLocaleString()} ${compareValue(strategy.actualImpressions, strategy.estimatedImpressions)}</td>
-                        <td>${strategy.actualConversions.toLocaleString()} ${compareValue(strategy.actualConversions, strategy.estimatedConversions)}</td>
-                        <td>$${actualCPM.toFixed(2)} ${compareValue(actualCPM, estimatedCPM, true)}</td>
-                        <td>$${actualCPC.toFixed(2)} ${compareValue(actualCPC, estimatedCPC, true)}</td>
+                        <th data-sort="string">Campaign Name</th>
+                        <th data-sort="number">Budget</th>
+                        <th data-sort="string">Channel</th>
+                        <th data-sort="string">Audience</th>
+                        <th data-sort="number">Impressions</th>
+                        <th data-sort="number">Conversions</th>
+                        <th data-sort="number">CPM</th>
+                        <th data-sort="number">CPC</th>
+                        <th>Comments</th>
                     </tr>
-                `}).join('')}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    ${results.strategies.map(strategy => {
+                        const actualCPM = calculateCPM(strategy.budget, strategy.actualImpressions);
+                        const estimatedCPM = calculateCPM(strategy.budget, strategy.estimatedImpressions);
+                        const actualCPC = calculateCPC(strategy.budget, strategy.actualConversions);
+                        const estimatedCPC = calculateCPC(strategy.budget, strategy.estimatedConversions);
+                        return `
+                        <tr>
+                            <td>${strategy.name}</td>
+                            <td data-sort-value="${strategy.budget}">$${strategy.budget.toLocaleString()}</td>
+                            <td>${strategy.channel}</td>
+                            <td>${strategy.audience}</td>
+                            <td data-sort-value="${strategy.actualImpressions}">${strategy.actualImpressions.toLocaleString()} ${compareValue(strategy.actualImpressions, strategy.estimatedImpressions)}</td>
+                            <td data-sort-value="${strategy.actualConversions}">${strategy.actualConversions.toLocaleString()} ${compareValue(strategy.actualConversions, strategy.estimatedConversions)}</td>
+                            <td data-sort-value="${actualCPM}">$${actualCPM.toFixed(2)} ${compareValue(actualCPM, estimatedCPM, true)}</td>
+                            <td data-sort-value="${actualCPC}">$${actualCPC.toFixed(2)} ${compareValue(actualCPC, estimatedCPC, true)}</td>
+                            <td>${strategy.Comments || ''}</td>
+                        </tr>
+                    `}).join('')}
+                </tbody>
+            </table>
+        </div>
     `;
 
+    console.log("Creating performance charts");
     createPerformanceCharts(results);
+    console.log("Making table sortable");
+    makeTableSortable('strategyTable');
 }
 
 function createPerformanceCharts(results) {
+    console.log("Creating chart container");
     const chartContainer = document.createElement('div');
     chartContainer.innerHTML = `
         <div class="chart-container">
@@ -232,15 +245,25 @@ function createPerformanceCharts(results) {
         <div class="chart-container">
             <canvas id="conversionRateChart"></canvas>
         </div>
+        <div class="chart-container">
+            <canvas id="costPerConversionChart"></canvas>
+        </div>
     `;
     document.querySelector('.main-content').appendChild(chartContainer);
 
+    console.log("Creating individual charts");
     createBudgetAllocationChart(results.strategies);
     createConversionRateChart(results.strategies);
+    createCostPerConversionChart(results.strategies);
 }
 
 function createBudgetAllocationChart(strategies) {
-    const ctx = document.getElementById('budgetAllocationChart').getContext('2d');
+    console.log("Creating budget allocation chart");
+    const ctx = document.getElementById('budgetAllocationChart');
+    if (!ctx) {
+        console.error("Budget allocation chart canvas not found");
+        return;
+    }
     new Chart(ctx, {
         type: 'pie',
         data: {
@@ -255,16 +278,26 @@ function createBudgetAllocationChart(strategies) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            title: {
-                display: true,
-                text: 'Budget Allocation by Strategy'
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Budget Allocation by Strategy',
+                    font: {
+                        size: 18
+                    }
+                }
             }
         }
     });
 }
 
 function createConversionRateChart(strategies) {
-    const ctx = document.getElementById('conversionRateChart').getContext('2d');
+    console.log("Creating conversion rate chart");
+    const ctx = document.getElementById('conversionRateChart');
+    if (!ctx) {
+        console.error("Conversion rate chart canvas not found");
+        return;
+    }
     new Chart(ctx, {
         type: 'bar',
         data: {
@@ -282,21 +315,106 @@ function createConversionRateChart(strategies) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            title: {
-                display: true,
-                text: 'Conversion Rate by Strategy'
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Conversion Rate Comparison by Strategy',
+                    font: {
+                        size: 18
+                    }
+                }
             },
             scales: {
-                yAxes: [{
+                y: {
+                    beginAtZero: true,
                     ticks: {
-                        beginAtZero: true,
                         callback: function(value) {
                             return value + '%';
                         }
                     }
-                }]
+                }
             }
         }
+    });
+}
+
+function createCostPerConversionChart(strategies) {
+    console.log("Creating cost per conversion chart");
+    const ctx = document.getElementById('costPerConversionChart');
+    if (!ctx) {
+        console.error("Cost per conversion chart canvas not found");
+        return;
+    }
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: strategies.map(s => s.name),
+            datasets: [{
+                label: 'Cost per Conversion',
+                data: strategies.map(s => s.budget / s.actualConversions),
+                backgroundColor: '#FF9F40'
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Cost per Conversion by Strategy',
+                    font: {
+                        size: 18
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function makeTableSortable(tableId) {
+    console.log("Making table sortable:", tableId);
+    const table = document.getElementById(tableId);
+    if (!table) {
+        console.error("Table not found:", tableId);
+        return;
+    }
+    const headers = table.querySelectorAll('th');
+    const tableBody = table.querySelector('tbody');
+    const rows = tableBody.querySelectorAll('tr');
+
+    headers.forEach((header, index) => {
+        header.addEventListener('click', () => {
+            console.log("Sorting table by column:", index);
+            const sortType = header.getAttribute('data-sort');
+            const direction = header.classList.contains('asc') ? -1 : 1;
+            const sortedRows = Array.from(rows).sort((a, b) => {
+                const aColText = a.querySelector(`td:nth-child(${index + 1})`).getAttribute('data-sort-value') || a.querySelector(`td:nth-child(${index + 1})`).textContent.trim();
+                const bColText = b.querySelector(`td:nth-child(${index + 1})`).getAttribute('data-sort-value') || b.querySelector(`td:nth-child(${index + 1})`).textContent.trim();
+
+                if (sortType === 'number') {
+                    return direction * (parseFloat(aColText) - parseFloat(bColText));
+                } else {
+                    return direction * aColText.localeCompare(bColText);
+                }
+            });
+
+            sortedRows.forEach(row => tableBody.appendChild(row));
+
+            headers.forEach(h => h.classList.remove('asc', 'desc'));
+            header.classList.toggle('asc', direction === 1);
+            header.classList.toggle('desc', direction === -1);
+        });
     });
 }
 
