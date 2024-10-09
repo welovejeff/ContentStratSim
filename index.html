@@ -8,6 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <!-- Add this in the <head> section, after other script tags -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
     <div class="menu-bar">
@@ -38,8 +40,10 @@
         <form id="strategyForm">
             <div id="strategyContainer"></div>
             <button type="button" onclick="addStrategy()">+ Add Content Strategy</button>
-            <button type="button" onclick="previewStrategy()">Preview Strategy</button>
+            <button type="button" onclick="showStrategyOverview()">Strategy Overview</button>
             <button type="button" onclick="downloadCSV()">Download CSV</button>
+            <!-- Add this button somewhere appropriate in your HTML, for example, near other action buttons -->
+            <button type="button" id="resetButton" class="reset-button">Reset All Strategies</button>
         </form>
         <div id="strategyPreview"></div>
     </div>
@@ -67,5 +71,25 @@
     </div>
 
     <script src="script.js"></script>
+    <!-- Add this modal HTML at the end of the body, before the closing </body> tag -->
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <h2>Confirm Reset</h2>
+            <p>Are you sure you want to reset all strategies? This action cannot be undone.</p>
+            <div class="modal-buttons">
+                <button id="confirmReset">Yes, Reset</button>
+                <button id="cancelReset">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <!-- Add this modal at the end of the body, before the closing </body> tag -->
+    <div id="strategyOverviewModal" class="modal">
+        <div class="modal-content strategy-overview-content">
+            <h2>Strategy Overview</h2>
+            <div id="strategyOverviewContainer"></div>
+            <button onclick="downloadStrategyOverviewPDF()">Download Overview PDF</button>
+            <button onclick="hideStrategyOverview()">Close</button>
+        </div>
+    </div>
 </body>
 </html>
